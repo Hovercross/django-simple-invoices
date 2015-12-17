@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from invoices.models import LineItem, Client, Invoice, HourlyService, FixedService, Expense, Payment, RelatedPDF
+from invoices.models import LineItem, Client, Invoice, HourlyService, FixedService, Expense, Payment, RelatedPDF, Credit
 from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
 
 class PaidListFilter(admin.SimpleListFilter):
@@ -54,6 +54,12 @@ class PaymentInline(InlineBase):
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
+class CreditInline(InlineBase):
+    model = Credit
+        
+    fields = ['date', 'description', 'amount', 'display_total']
+    readonly_fields = ['display_total']
+
 class RelatedPDFInline(InlineBase):
     model = RelatedPDF
 
@@ -61,7 +67,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     def invoice(self, o):
         return "Invoice {}".format(o.id)
         
-    inlines = [HourlyServiceInline, FixedServiceInline, ExpenseInline, PaymentInline, RelatedPDFInline]
+    inlines = [HourlyServiceInline, FixedServiceInline, ExpenseInline, PaymentInline, CreditInline, RelatedPDFInline]
     list_filter = ['client__name', PaidListFilter]
     list_display = ('invoice', 'client', 'date', 'total')
     

@@ -42,7 +42,7 @@ class DisplayTotalMixin(object):
     @property
     def display_total(self):
         if self.total:
-            return "{:0.2f}".format(self.total)
+            return "${:0.2f}".format(self.total)
         
         return "-"
 
@@ -50,7 +50,7 @@ class ReverseDisplayTotalMixin(object):
     @property
     def display_total(self):
         if self.total:
-            return "{:0.2f}".format(self.total * -1)
+            return "${:0.2f}".format(self.total * -1)
         
         return "-"
     
@@ -61,13 +61,8 @@ class LineItem(PolymorphicModel):
     
     total = models.DecimalField(max_digits=20, decimal_places=2)
     
-    def get_display_total(self):
-        super().get_display_total()
-        
-        if self.total:
-            return "{:0.2f}".format(self.total)
-        
-        return "-"
+    def __str__(self):
+        return self.description
 
 class HourlyService(LineItem, DisplayTotalMixin):
     location = models.CharField(max_length=255, blank=True, null=True)
@@ -85,14 +80,21 @@ class FixedService(LineItem, DisplayTotalMixin):
         self.total = self.amount
         super().save(*args, **kwargs)
         
-class Expense(LineItem, ReverseDisplayTotalMixin):
+class Expense(LineItem, DisplayTotalMixin):
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    def save(self, *args, **kwargs):
+        self.total = self.amount
+        super().save(*args, **kwargs)
+    
+class Payment(LineItem, ReverseDisplayTotalMixin):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     
     def save(self, *args, **kwargs):
         self.total = self.amount * -1
         super().save(*args, **kwargs)
-    
-class Payment(LineItem, ReverseDisplayTotalMixin):
+
+class Credit(LineItem, ReverseDisplayTotalMixin):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     
     def save(self, *args, **kwargs):
