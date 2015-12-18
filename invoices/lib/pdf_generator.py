@@ -57,7 +57,6 @@ class InvoicePDFBuilder(object):
             ]]
             
             uniform_rate_value = self.hourly_services.values('rate')[0]['rate']
-            print(uniform_rate_value)
             
         if not uniform_rate:
             self.hourly_items_total = Decimal(0)

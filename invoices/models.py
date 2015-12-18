@@ -40,6 +40,9 @@ class Invoice(models.Model):
     payment_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     credit_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     
+    total_charges = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    total_credits = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    
     total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     
     ordering = ['client__name', 'date']
@@ -81,9 +84,15 @@ class Invoice(models.Model):
                 
             setattr(self, attr, type_total)
         
-        ATTRS = ['hourly_services_total', 'fixed_services_total', 'expense_total', 'payment_total', 'credit_total']
+        CHARGE_ATTRS = ['hourly_services_total', 'fixed_services_total', 'expense_total']
+        CREDIT_ATTRS = ['payment_total', 'credit_total']
         
-        self.total = sum([getattr(self, attr) for attr in ATTRS])
+        
+        self.total_charges = sum([getattr(self, attr) for attr in CHARGE_ATTRS])
+        self.total_credits = sum([getattr(self, attr) for attr in CREDIT_ATTRS]) * -1
+        
+        self.total = self.total_charges - self.total_credits
+
     
     def get_absolute_url(self):
         return reverse('invoices.views.invoice', kwargs={'id': self.id})

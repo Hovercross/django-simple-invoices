@@ -65,17 +65,27 @@ class InvoiceAdmin(admin.ModelAdmin):
     
     fields = ['client', 'date', 'total']
     readonly_fields = ['total']
-        
+    
+    actions = ['update_totals']
+    
     inlines = [HourlyServiceInline, FixedServiceInline, ExpenseInline, PaymentInline, CreditInline, RelatedPDFInline]
     list_filter = ['client__name', PaidListFilter]
-    list_display = ('invoice', 'client', 'date', 'total')
+    list_display = ('invoice', 'client', 'date', 'total_charges', 'total_credits', 'total')
     
+    
+    def update_totals(self, request, queryset):
+        for invoice in queryset:
+            invoice.update_totals()
+            invoice.save()
+    
+    update_totals.short_description = "Update the totals for selected invoices"
     
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
         invoice = form.instance
         invoice.update_totals()
         invoice.save()
+    
 
 
 admin.site.register(Client, ClientAdmin)    
