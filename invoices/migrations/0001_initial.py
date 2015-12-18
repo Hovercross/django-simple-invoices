@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Client',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('id', models.AutoField(serialize=False, auto_created=True, primary_key=True, verbose_name='ID')),
                 ('name', models.CharField(max_length=50)),
                 ('address', models.TextField(blank=True)),
             ],
@@ -25,11 +25,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Credit',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
-                ('date', models.DateField(null=True, blank=True)),
-                ('description', models.CharField(max_length=255, blank=True)),
-                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('id', models.AutoField(serialize=False, auto_created=True, primary_key=True, verbose_name='ID')),
+                ('date', models.DateField(blank=True, null=True)),
+                ('description', models.CharField(blank=True, max_length=255)),
+                ('total', models.DecimalField(max_digits=20, decimal_places=2)),
+                ('amount', models.DecimalField(max_digits=10, decimal_places=2)),
             ],
             options={
                 'abstract': False,
@@ -39,11 +39,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Expense',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
-                ('date', models.DateField(null=True, blank=True)),
-                ('description', models.CharField(max_length=255, blank=True)),
-                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('id', models.AutoField(serialize=False, auto_created=True, primary_key=True, verbose_name='ID')),
+                ('date', models.DateField(blank=True, null=True)),
+                ('description', models.CharField(blank=True, max_length=255)),
+                ('total', models.DecimalField(max_digits=20, decimal_places=2)),
+                ('amount', models.DecimalField(max_digits=10, decimal_places=2)),
             ],
             options={
                 'abstract': False,
@@ -53,11 +53,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='FixedService',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
-                ('date', models.DateField(null=True, blank=True)),
-                ('description', models.CharField(max_length=255, blank=True)),
-                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('id', models.AutoField(serialize=False, auto_created=True, primary_key=True, verbose_name='ID')),
+                ('date', models.DateField(blank=True, null=True)),
+                ('description', models.CharField(blank=True, max_length=255)),
+                ('total', models.DecimalField(max_digits=20, decimal_places=2)),
+                ('amount', models.DecimalField(max_digits=10, decimal_places=2)),
             ],
             options={
                 'abstract': False,
@@ -67,13 +67,13 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='HourlyService',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
-                ('date', models.DateField(null=True, blank=True)),
-                ('description', models.CharField(max_length=255, blank=True)),
-                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('location', models.CharField(max_length=255, null=True, blank=True)),
-                ('hours', models.DecimalField(decimal_places=3, max_digits=11)),
-                ('rate', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('id', models.AutoField(serialize=False, auto_created=True, primary_key=True, verbose_name='ID')),
+                ('date', models.DateField(blank=True, null=True)),
+                ('description', models.CharField(blank=True, max_length=255)),
+                ('total', models.DecimalField(max_digits=20, decimal_places=2)),
+                ('location', models.CharField(blank=True, null=True, max_length=255)),
+                ('hours', models.DecimalField(max_digits=11, decimal_places=3)),
+                ('rate', models.DecimalField(max_digits=10, decimal_places=2)),
             ],
             options={
                 'abstract': False,
@@ -83,26 +83,28 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Invoice',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
-                ('date', models.DateField(null=True, blank=True)),
+                ('id', models.AutoField(serialize=False, auto_created=True, primary_key=True, verbose_name='ID')),
+                ('date', models.DateField(blank=True, null=True)),
                 ('finalized', models.BooleanField(default=False)),
-                ('hourly_services_total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('fixed_services_total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('expense_total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('payment_total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('credit_total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
+                ('hourly_services_total', models.DecimalField(max_digits=20, default=0, decimal_places=2)),
+                ('fixed_services_total', models.DecimalField(max_digits=20, default=0, decimal_places=2)),
+                ('expense_total', models.DecimalField(max_digits=20, default=0, decimal_places=2)),
+                ('payment_total', models.DecimalField(max_digits=20, default=0, decimal_places=2)),
+                ('credit_total', models.DecimalField(max_digits=20, default=0, decimal_places=2)),
+                ('total_charges', models.DecimalField(max_digits=20, default=0, decimal_places=2)),
+                ('total_credits', models.DecimalField(max_digits=20, default=0, decimal_places=2)),
+                ('total', models.DecimalField(max_digits=20, default=0, decimal_places=2)),
                 ('client', models.ForeignKey(to='invoices.Client')),
             ],
         ),
         migrations.CreateModel(
             name='Payment',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
-                ('date', models.DateField(null=True, blank=True)),
-                ('description', models.CharField(max_length=255, blank=True)),
-                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('id', models.AutoField(serialize=False, auto_created=True, primary_key=True, verbose_name='ID')),
+                ('date', models.DateField(blank=True, null=True)),
+                ('description', models.CharField(blank=True, max_length=255)),
+                ('total', models.DecimalField(max_digits=20, decimal_places=2)),
+                ('amount', models.DecimalField(max_digits=10, decimal_places=2)),
                 ('invoice', models.ForeignKey(to='invoices.Invoice')),
             ],
             options={
@@ -113,19 +115,26 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RelatedPDF',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
-                ('pdf', models.FileField(verbose_name='PDF', upload_to=invoices.models.uuidUpload)),
+                ('id', models.AutoField(serialize=False, auto_created=True, primary_key=True, verbose_name='ID')),
+                ('pdf', models.FileField(upload_to=invoices.models.uuidUpload, verbose_name='PDF')),
                 ('invoice', models.ForeignKey(to='invoices.Invoice')),
             ],
         ),
         migrations.CreateModel(
             name='Vendor',
             fields=[
-                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
-                ('phone', models.CharField(max_length=50, blank=True)),
-                ('email', models.EmailField(max_length=254, blank=True)),
+                ('id', models.AutoField(serialize=False, auto_created=True, primary_key=True, verbose_name='ID')),
+                ('name', models.CharField(max_length=50)),
+                ('phone', models.CharField(blank=True, max_length=50)),
+                ('email', models.EmailField(blank=True, max_length=254)),
+                ('checks_payable_to', models.CharField(blank=True, max_length=254)),
                 ('address', models.TextField(blank=True)),
             ],
+        ),
+        migrations.AddField(
+            model_name='invoice',
+            name='vendor',
+            field=models.ForeignKey(to='invoices.Vendor'),
         ),
         migrations.AddField(
             model_name='hourlyservice',
