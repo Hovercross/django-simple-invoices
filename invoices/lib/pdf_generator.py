@@ -402,14 +402,14 @@ class InvoicePDFBuilder(object):
         expense_items = list(self.get_expense_story_items())
         if expense_items:
             yield KeepTogether(expense_items + [Spacer(1, .5*inch)])
+    
+        credit_items = list(self.get_credit_story_items())
+        if credit_items:
+            yield KeepTogether(credit_items + [Spacer(1, .5*inch)])
         
         payment_items = list(self.get_payment_story_items())
         if payment_items:
             yield KeepTogether(payment_items + [Spacer(1, .5*inch)])
-        
-        credit_items = list(self.get_credit_story_items())
-        if credit_items:
-            yield KeepTogether(credit_items + [Spacer(1, .5*inch)])
         
         total_items = list(self.get_total_items())
         if total_items:
