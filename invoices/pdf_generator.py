@@ -19,7 +19,7 @@ from PyPDF2 import PdfFileWriter, PdfFileReader, PdfFileMerger
 
 from copy import copy, deepcopy
 
-from invoices.models import FixedService
+from invoices.models import FixedService, HourlyService
 
 accentColor = colors.Color(red=.325, green=.484, blue=.612)
 
@@ -137,13 +137,84 @@ def build_invoice_pdf(invoice, output):
 
         canvas.restoreState()
     
+    misc_line_items = Decimal(0)
+    hourly_services_total = Decimal(0)
     fixed_services_total = Decimal(0)
+    expenses_total = Decimal(0)
+    payment_total = Decimal(0)
+    credit_total = Decimal(0)
+    
     
     doc = SimpleDocTemplate(output, leftMargin = .75 * inch, rightMargin = .75 * inch, pagesize=(8.5*inch, 11*inch), topMargin=1.25*inch)
     story = [Spacer(1, 1.5 * inch)]
     
+    
     #TODO: Generic
     #TODO: Hourly
+
+    hourly_services = HourlyService.objects.filter(invoice=invoice).order_by('date')
+    rate_values = hourly_services.values_list('rate')
+        
+    if hourly_services:
+        if len(rate_values) == 1:
+            hourly_per_row = False
+        else:
+            hourly_per_row = True
+        
+        together = []
+        together.append(Paragraph("Hourly Services", tableNameStyle))
+        
+        if hourly_per_row:
+            table = [[
+                Paragraph("Date", tableHeaderStyle), 
+                Paragraph("Location", tableHeaderStyle), 
+                Paragraph("Description", tableHeaderStyle), 
+                Paragraph("Hours", tableHeaderStyle),
+                Paragraph("Rate", tableHeaderStyle),
+                Paragraph("Total", tableHeaderStyleRight),
+            ]]
+        else:
+            table = [[
+                Paragraph("Date", tableHeaderStyle), 
+                Paragraph("Location", tableHeaderStyle), 
+                Paragraph("Description", tableHeaderStyle), 
+                Paragraph("Hours", tableHeaderStyleRight)
+            ]]
+        
+        for hourly_service in hourly_services:
+            if hourly_per_row:
+                row = [
+                    hourly_service.date and Paragraph(hourly_service.date.strftime(line_item_date_format), tableItemStyle) or None,
+                    hourly_service.location and Paragraph(hourly_service.description, tableItemStyle) or None,
+                    hourly_service.description and Paragraph(hourly_service.description, tableItemStyle) or None,
+                    hourly_service.hours and Paragraph("{:0.3f}".format(hourly_service.hours), tableItemStyle) or None,
+                    hourly_service.rate and Paragraph("{:0.2f}".format(hourly_service.rate), tableItemStyle) or None,
+                    Paragraph(hourly_service.display_total, tableItemStyleRight)
+                ]
+                
+                hourly_services_total += Decimal(round(hourly_service.total, 2))
+            else:
+                row = [
+                    hourly_service.date and Paragraph(hourly_service.date.strftime(line_item_date_format), tableItemStyle) or None,
+                    hourly_service.location and Paragraph(hourly_service.description, tableItemStyle) or None,
+                    hourly_service.description and Paragraph(hourly_service.description, tableItemStyle) or None,
+                    hourly_service.hours and Paragraph("{:0.3f}".format(hourly_service.hours), tableItemStyleRight) or None,
+                ]
+                
+                hourly_services_total += Decimal(round(hourly_service.total, 2))
+            
+            table.append(row)
+            
+        tableStyle = []
+        tableStyle.extend(defaultTableStyle)
+        
+        t = Table(table)
+        t.setStyle(TableStyle(tableStyle))
+        
+        together.append(t)
+        together.append(Spacer(1, .5*inch))
+        
+        story.append(KeepTogether(together))
 
     fixed_services = FixedService.objects.filter(invoice=invoice).order_by('date')
     #We have to iterate anyway, don't bother hitting the DB again
