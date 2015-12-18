@@ -5,7 +5,6 @@ from django.db import models
 from django.core.urlresolvers import reverse
 
 from polymorphic.models import PolymorphicModel
-from invoices.managers import InvoiceManager
 
 
 def uuidUpload(instance, filename):
@@ -31,9 +30,56 @@ class Invoice(models.Model):
     date = models.DateField(blank=True, null=True)
     finalized = models.BooleanField(default=False)
     
-    objects = InvoiceManager()
+    hourly_services_total = models.DecimalField(max_digits=20, decimal_places=2)
+    fixed_services_total = models.DecimalField(max_digits=20, decimal_places=2)
+    expense_total = models.DecimalField(max_digits=20, decimal_places=2)
+    payment_total = models.DecimalField(max_digits=20, decimal_places=2)
+    credit_total = models.DecimalField(max_digits=20, decimal_places=2)
+    
+    total = models.DecimalField(max_digits=20, decimal_places=2)
     
     ordering = ['client__name', 'date']
+    
+    def update_totals(self):
+        #Special case for hourly to make sure we are using the same computation methods throughout
+        hourly_services = HourlyService.objects.filter(invoice=self)
+        
+        rates = set()
+        total_hours = Decimal()
+        total_dollars = Decimal()
+        
+        #Track both total hours and total dollars, along with the seen rates. We'll decide what to do at the end.
+        for hourly_service in hourly_services:
+            rates.add(hourly_service.rate)
+            total_hours += hourly_service.hours
+            total_dollars += hourly_service.total
+        
+        if len(rates) == 0:
+            self.hourly_services_total = 0
+        elif len(rates) == 1:
+            #Aggregated hours
+            rate = rates.pop()
+            self.hourly_services_total = round(round(total_hours, 3) * rate, 2)
+        else:
+            self.hourly_services_total = total_dollars
+        
+        MAPPING = [
+            ('fixed_services_total', FixedService),
+            ('expense_total', Expense),
+            ('payment_total', Payment),
+            ('credit_total', Credit)
+        ]
+        
+        for attr, C in MAPPING:
+            type_total = C.objects.filter(invoice=self).aggregate(models.Sum('total'))['total__sum']
+            if type_total == None:
+                type_total = 0
+                
+            setattr(self, attr, type_total)
+        
+        ATTRS = ['hourly_services_total', 'fixed_services_total', 'expense_total', 'payment_total', 'credit_total']
+        
+        self.total = sum([getattr(self, attr) for attr in ATTRS])
     
     def get_absolute_url(self):
         return reverse('invoices.views.invoice', kwargs={'id': self.id})

@@ -13,12 +13,11 @@ class PaidListFilter(admin.SimpleListFilter):
     
     def queryset(self, request, queryset):
         if self.value() == 'paid':
-            return queryset.filter(total=0)
+            return queryset.filter(total = 0)
                     
         elif self.value() == 'unpaid':
             return queryset.exclude(total = 0)
         
-        return queryset
 
 class LineItemParentAdmin(PolymorphicParentModelAdmin):
     base_model = LineItem
@@ -66,13 +65,20 @@ class RelatedPDFInline(InlineBase):
 class InvoiceAdmin(admin.ModelAdmin):
     def invoice(self, o):
         return "Invoice {}".format(o.id)
+    
+    fields = ['client', 'date', 'total']
+    readonly_fields = ['total']
         
     inlines = [HourlyServiceInline, FixedServiceInline, ExpenseInline, PaymentInline, CreditInline, RelatedPDFInline]
     list_filter = ['client__name', PaidListFilter]
     list_display = ('invoice', 'client', 'date', 'total')
     
-    def total(self, obj):
-        return obj.total
+    
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        invoice = form.instance
+        invoice.update_totals()
+        invoice.save()
 
 
 admin.site.register(Client, ClientAdmin)    
