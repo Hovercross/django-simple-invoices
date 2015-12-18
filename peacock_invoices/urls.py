@@ -18,5 +18,5 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^invoice/(?P<id>[0-9]+)/$', 'invoices.views.invoice')
+    url(r'^invoices/', include('invoices.urls')),
 ]

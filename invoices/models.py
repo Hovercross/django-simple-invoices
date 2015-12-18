@@ -1,12 +1,12 @@
 import os
-
 from decimal import Decimal
 
 from django.db import models
+from django.core.urlresolvers import reverse
 
 from polymorphic.models import PolymorphicModel
-
 from invoices.managers import InvoiceManager
+
 
 def uuidUpload(instance, filename):
     name, ext = os.path.splitext(filename)
@@ -34,6 +34,9 @@ class Invoice(models.Model):
     objects = InvoiceManager()
     
     ordering = ['client__name', 'date']
+    
+    def get_absolute_url(self):
+        return reverse('invoices.views.invoice', kwargs={'id': self.id})
     
     def __str__(self):
         return "{id} - {client}".format(id=self.id, client=self.client)
