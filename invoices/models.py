@@ -133,7 +133,13 @@ class LineItem(models.Model):
     
     class Meta:
         abstract = True
-
+    
+    def __str__(self):
+        if self.description:
+            return "{class_name:} {id:}: {description}".format(class_name=self.__class__.__name__, id=self.id, description=self.description)
+        
+        return "{class_name:} {id:}".format(class_name=self.__class__.__name__, id=self.id, description=self.description)
+    
 class HourlyService(LineItem, DisplayTotalMixin):
     location = models.CharField(max_length=255, blank=True, null=True)
     hours = models.DecimalField(max_digits=11, decimal_places=3)
@@ -142,6 +148,7 @@ class HourlyService(LineItem, DisplayTotalMixin):
     def save(self, *args, **kwargs):
         self.total = self.hours * self.rate
         super().save(*args, **kwargs)
+    
     
 class FixedService(LineItem, DisplayTotalMixin):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
