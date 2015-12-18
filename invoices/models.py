@@ -1,4 +1,6 @@
 import os
+import uuid
+
 from decimal import Decimal
 
 from django.db import models
@@ -21,10 +23,23 @@ class Client(models.Model):
     
     def __str__(self):
         return self.name
+
+class Vendor(models.Model):
+    name = models.CharField(max_length=50)
+    phone = models.CharField(max_length=50, blank=True)
+    email = models.EmailField(max_length=254, blank=True)
+    checks_payable_to = models.CharField(max_length=254, blank=True)
+    
+    address = models.TextField(blank=True)
+    
+    def __str__(self):
+        return self.name
     
 
 class Invoice(models.Model):
     client = models.ForeignKey(Client)
+    vendor = models.ForeignKey(Vendor)
+    
     date = models.DateField(blank=True, null=True)
     finalized = models.BooleanField(default=False)
     

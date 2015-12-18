@@ -2,6 +2,7 @@
 
 from datetime import date
 from decimal import Decimal
+from io import BytesIO
 
 from django.db.models import Sum
 
@@ -9,7 +10,9 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, KeepTogether
 
-from invoices.models import HourlyService, FixedService, Expense, Payment, Credit
+from PyPDF2 import PdfFileWriter, PdfFileReader, PdfFileMerger
+
+from invoices.models import HourlyService, FixedService, Expense, Payment, Credit, RelatedPDF
 from invoices.lib.pdf_styles import accent_color, line_item_date_format, table_item_style, table_item_style_right, table_header_style, table_header_style_right, table_name_style, default_table_style, table_total_style
 
 class InvoicePDFBuilder(object):
@@ -22,13 +25,108 @@ class InvoicePDFBuilder(object):
         self.payments = Payment.objects.filter(invoice=invoice).order_by('date')
         self.credits = Credit.objects.filter(invoice=invoice).order_by('date')
         
-        #Will be calculated by get_hourly_story_items so the math between uniform and non-uniform rates are consistent
-        self.hourly_items_total = None
+        self.pdf_includes = RelatedPDF.objects.filter(invoice=invoice)
+    
+    #Returns the top section end, broken to it's own method so I can run this without actually drawing anything
+    def on_first_page(self, canvas=None):
+        def noop(*args, **kwargs):
+            pass
         
-        self.fixed_services_total = self.fixed_services.aggregate(Sum('total'))['total__sum']
-        self.expense_total = self.expenses.aggregate(Sum('total'))['total__sum']
-        self.payment_total = self.payments.aggregate(Sum('total'))['total__sum']
-        self.credit_total = self.credits.aggregate(Sum('total'))['total__sum']
+        #Fake object that proxies the canvas object - if canvas is none, this returns a method that does nothing for calling
+        class CanvasProxy(object):
+            def __init__(self, canvas):
+                self.canvas = canvas
+            
+            def __getattr__(self, key):
+                if self.canvas:
+                    return getattr(self.canvas, key)
+                
+                return noop
+                
+                    
+        canvas = CanvasProxy(canvas)
+                    
+        canvas.saveState()
+        canvas.setFont('HelveticaNeue-Bold', 13)
+        canvas.setStrokeColor(accent_color)
+        canvas.setFillColor(accent_color)
+    
+        canvas.line(.75 * inch, (11-.5)*inch, 7.75*inch, (11-.5)*inch)
+        canvas.drawString(.75 * inch, (11-.75) * inch, self.invoice.vendor.name)
+
+        canvas.setFont('HelveticaNeue-Light', 16)
+        canvas.setFillColor(colors.black)        
+        canvas.drawString(.75 * inch, 9.75 * inch, "INVOICE")
+        
+        line_space = .15*inch
+        
+        #Draw left side
+        left_side_y = 9.45*inch
+        
+        canvas.setFont('HelveticaNeue-Light', 10)
+        canvas.setFillColor(accent_color)
+        
+        if self.invoice.vendor.phone:
+            canvas.drawString(.75 * inch, left_side_y, self.invoice.vendor.phone)
+            left_side_y -= line_space
+        
+        if self.invoice.vendor.email:
+            canvas.drawString(.75 * inch, left_side_y, self.invoice.vendor.email)
+            left_side_y -= line_space
+        
+        canvas.setFont('HelveticaNeue-Light', 10)
+        canvas.setFillColor(colors.black)
+        if self.invoice.vendor.address:
+            left_side_y -= line_space
+            address_lines = self.invoice.vendor.address.splitlines()
+            
+            for address_line in address_lines:                    
+                canvas.drawString(.75 * inch, left_side_y, address_line)
+                left_side_y -= line_space
+        
+        #Draw right side
+        canvas.setFont('HelveticaNeue-Bold', 10)
+        canvas.setFillColor(colors.black)
+        canvas.drawString(4.25 * inch, 9.75*inch, self.invoice.client.name)
+    
+        right_side_y = 9.45*inch
+        
+        canvas.setFont('HelveticaNeue-Light', 10)
+        canvas.setFillColor(colors.black)
+        
+        if self.invoice.client.address:
+            address_lines = self.invoice.client.address.splitlines()
+            
+            for address_line in address_lines:
+                canvas.drawString(4.25 * inch, right_side_y, address_line)
+                right_side_y -= line_space
+            
+            right_side_y -= line_space #Extra line break
+            
+    
+        if self.invoice.date:
+            canvas.drawString(4.25 * inch, right_side_y, "Invoice date: {:}".format(self.invoice.date.strftime("%B %d, %Y")))
+            right_side_y -= line_space
+            
+        canvas.drawString(4.25 * inch, right_side_y, "Invoice number: {:}".format(self.invoice.id))
+        right_side_y -= line_space*2 #Extra line break
+        
+        if self.invoice.vendor.checks_payable_to:
+            canvas.drawString(4.25 * inch, right_side_y, "Please make checks payable to {}".format(self.invoice.vendor.checks_payable_to))
+            right_side_y -= line_space
+                    
+        top_section_y = min(left_side_y, right_side_y)
+        
+        canvas.setStrokeColor(colors.grey)
+        canvas.line(.75 * inch, top_section_y, 7.75*inch, top_section_y)
+        
+        canvas.setAuthor("Adam M Peacock")
+        canvas.setSubject("Invoice")
+        canvas.setTitle("Invoice {}".format(self.invoice.id))
+        
+        canvas.restoreState()
+        
+        return 11*inch - top_section_y
         
     def get_hourly_story_items(self):
         if not self.hourly_services:
@@ -58,10 +156,7 @@ class InvoicePDFBuilder(object):
             
             uniform_rate_value = self.hourly_services.values('rate')[0]['rate']
             
-        if not uniform_rate:
-            self.hourly_items_total = Decimal(0)
-        else:
-            total_hours = Decimal(0)
+        total_hours = Decimal(0)
             
         for hourly_service in self.hourly_services:
             if not uniform_rate:
@@ -74,8 +169,6 @@ class InvoicePDFBuilder(object):
                     Paragraph(hourly_service.display_total, table_item_style_right)
                 ])
                 
-                self.hourly_items_total += hourly_item.total
-                
             else:
                 table.append([
                     hourly_service.date and Paragraph(hourly_service.date.strftime(line_item_date_format), table_item_style) or None,
@@ -86,9 +179,6 @@ class InvoicePDFBuilder(object):
                 
                 total_hours += hourly_service.hours
         
-        if uniform_rate:
-            self.hourly_items_total = Decimal(round(total_hours * uniform_rate_value, 2))
-        
         table_style = []
         table_style.extend(default_table_style)
         
@@ -97,7 +187,7 @@ class InvoicePDFBuilder(object):
                 Paragraph("Total Hours", table_total_style),
                 None,
                 None,
-                Paragraph("${:.2f}".format(total_hours), table_total_style)
+                Paragraph("{:.3f}".format(total_hours), table_total_style)
             ])
             
             table.append([
@@ -113,7 +203,7 @@ class InvoicePDFBuilder(object):
                 Paragraph("Hourly Services Total", table_total_style), 
                 None,
                 None,
-                Paragraph("${:.2f}".format(self.hourly_items_total), table_total_style)])
+                Paragraph("${:.2f}".format(self.invoice.hourly_services_total), table_total_style)])
             
             table_style.remove(('LINEABOVE', (0, -1), (-1, -1), 1, colors.black))
             table_style.remove(('LINEABOVE', (0, 0), (-1, -2), .25, colors.grey))
@@ -129,7 +219,7 @@ class InvoicePDFBuilder(object):
                 None,
                 None,
                 None,
-                Paragraph("${:.2f}".format(self.hourly_items_total), table_total_style)])
+                Paragraph("${:.2f}".format(self.invoice.hourly_services_total), table_total_style)])
             
             col_widths = [1*inch, 1*inch, 2.5*inch, .75*inch, .75*inch, 1*inch]
             
@@ -162,7 +252,7 @@ class InvoicePDFBuilder(object):
         table.append([
             Paragraph("Fixed Rate Services Total", table_total_style),
             None,
-            Paragraph("${:0.2f}".format(self.fixed_services_total), table_total_style)
+            Paragraph("${:0.2f}".format(self.invoice.fixed_services_total), table_total_style)
         ])
         
         
@@ -195,7 +285,7 @@ class InvoicePDFBuilder(object):
         table.append([
             Paragraph("Total Expenses", table_total_style),
             None,
-            Paragraph("${:0.2f}".format(self.expense_total), table_total_style)
+            Paragraph("${:0.2f}".format(self.invoice.expense_total), table_total_style)
         ])
         
         
@@ -229,7 +319,7 @@ class InvoicePDFBuilder(object):
         table.append([
             Paragraph("Total Payments", table_total_style),
             None,
-            Paragraph("${:0.2f}".format(self.payment_total*-1), table_total_style)
+            Paragraph("${:0.2f}".format(self.invoice.payment_total*-1), table_total_style)
         ])
         
         
@@ -263,7 +353,7 @@ class InvoicePDFBuilder(object):
         table.append([
             Paragraph("Total Credits", table_total_style),
             None,
-            Paragraph("${:0.2f}".format(self.credit_total*-1), table_total_style)
+            Paragraph("${:0.2f}".format(self.invoice.credit_total*-1), table_total_style)
         ])
         
         
@@ -275,57 +365,7 @@ class InvoicePDFBuilder(object):
             
     def build_pdf(self, output):
         def onFirstPage(canvas, doc):
-            canvas.saveState()
-            canvas.setFont('HelveticaNeue-Bold', 13)
-            canvas.setStrokeColor(accent_color)
-            canvas.setFillColor(accent_color)
-        
-            canvas.line(.75 * inch, (11-.5)*inch, 7.75*inch, (11-.5)*inch)
-            canvas.drawString(.75 * inch, (11-.75) * inch, "Adam M Peacock")
-
-            canvas.setFont('HelveticaNeue-Light', 16)
-            canvas.setFillColor(colors.black)        
-            canvas.drawString(.75 * inch, 9.75 * inch, "INVOICE")
-        
-            canvas.setFont('HelveticaNeue-Light', 10)
-            canvas.setFillColor(accent_color)
-            canvas.drawString(.75 * inch, 9.45*inch, "(860) 309-0293")
-            canvas.drawString(.75 * inch, 9.30*inch, "adam@thepeacock.net")
-        
-            canvas.setFillColor(colors.black)
-            canvas.drawString(.75 * inch, 9 * inch, "94 West St, Apt 21")
-            canvas.drawString(.75 * inch, 8.85 * inch, "Vernon, CT 06066")
-        
-            #Client area
-            canvas.setFont('HelveticaNeue-Bold', 10)
-            canvas.drawString(4.25 * inch, 9.75 * inch, self.invoice.client.name)
-        
-            canvas.setFont('HelveticaNeue-Light', 10)
-            address_lines = self.invoice.client.address.splitlines()
-            num_address_lines = len(address_lines)
-        
-            for i, address_line in enumerate(address_lines):
-                canvas.drawString(4.25 * inch, (9.55 - i*.15) * inch, address_line)
-        
-            if self.invoice.date:
-                canvas.drawString(4.25 * inch, (9.45 - (num_address_lines*.15)) * inch, "Invoice date: {:}".format(self.invoice.date.strftime("%B %d, %Y")))
-            
-            canvas.drawString(4.25 * inch, (9.30 - (num_address_lines*.15)) * inch, "Invoice number: {:}".format(self.invoice.id))
-            canvas.drawString(4.25 * inch, (9.05 - (num_address_lines*.15)) * inch, "Please make checks payable to Adam M Peacock")
-            
-            addresses_bottom = (9.05 - num_address_lines*.15) * inch
-            other_bottom = 8.85 * inch
-            
-            top_section_bottom = min(addresses_bottom, other_bottom)
-            
-            canvas.setStrokeColor(colors.grey)
-            canvas.line(.75 * inch, top_section_bottom - .15*inch, 7.75*inch, top_section_bottom - .15*inch)
-            
-            canvas.setAuthor("Adam M Peacock")
-            canvas.setSubject("Invoice")
-            canvas.setTitle("Invoice {}".format(self.invoice.id))
-            
-            canvas.restoreState()
+            self.on_first_page(canvas)
         
         def onLaterPages(canvas, doc):
             canvas.saveState()
@@ -334,7 +374,7 @@ class InvoicePDFBuilder(object):
             canvas.setFillColor(accent_color)
     
             canvas.line(.75 * inch, (11-.5)*inch, 7.75*inch, (11-.5)*inch)
-            canvas.drawString(.75 * inch, (11-.75) * inch, "Adam M Peacock")
+            canvas.drawString(.75 * inch, (11-.75) * inch, self.invoice.vendor.name)
 
             canvas.setFont('HelveticaNeue-Light', 16)
             canvas.setFillColor(colors.black)        
@@ -351,20 +391,36 @@ class InvoicePDFBuilder(object):
             
             canvas.restoreState()
         
-        doc = SimpleDocTemplate(output, leftMargin = .75 * inch, rightMargin = .75 * inch, pagesize=(8.5*inch, 11*inch), topMargin=1.25*inch)
-        
+        if self.pdf_includes:
+            #Holding object so I can merge it with the PDFs later
+            reportlab_output = BytesIO()
+        else:
+            #Output to whatever we were given
+            reportlab_output = output
+            
+        doc = SimpleDocTemplate(reportlab_output, leftMargin = .75 * inch, rightMargin = .75 * inch, pagesize=(8.5*inch, 11*inch), topMargin=1.25*inch)
         story = list(self.get_story())
         doc.build(story, onFirstPage=onFirstPage, onLaterPages=onLaterPages)
+        
+        if self.pdf_includes:
+            reader = PdfFileReader(reportlab_output)
+            merger = PdfFileMerger()
+            merger.append(reader)
+            
+            for pdf_include in self.pdf_includes:
+                merger.append(fileobj = pdf_include.pdf)
+            
+            merger.write(output)
         
     def get_total_items(self):
         table = []
         
         TOTAL_MAPPING = (
-            ('Hourly Services', self.hourly_items_total, 1),
-            ('Fixed Services', self.fixed_services_total, 1),
-            ('Expenses', self.expense_total, 1),
-            ('Payments', self.payment_total, 1),
-            ('Credits', self.credit_total, 1),
+            ('Hourly Services', self.invoice.hourly_services_total, 1),
+            ('Fixed Services', self.invoice.fixed_services_total, 1),
+            ('Expenses', self.invoice.expense_total, 1),
+            ('Payments', self.invoice.payment_total, -1),
+            ('Credits', self.invoice.credit_total, -1),
         )
         
         for description, amount, multiplier in TOTAL_MAPPING:
@@ -387,7 +443,9 @@ class InvoicePDFBuilder(object):
         yield table_item
         
     def get_story(self):
-        yield Spacer(1, 1.5 * inch)
+        first_page_buffer = self.on_first_page()
+
+        yield Spacer(1, first_page_buffer - 1.15 * inch)
         
         hourly_story_items = list(self.get_hourly_story_items())
         if hourly_story_items:

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from invoices.models import LineItem, Client, Invoice, HourlyService, FixedService, Expense, Payment, RelatedPDF, Credit
+from invoices.models import Client, Vendor, Invoice, HourlyService, FixedService, Expense, Payment, RelatedPDF, Credit
 
 class PaidListFilter(admin.SimpleListFilter):
     title = "paid"
@@ -63,15 +63,14 @@ class InvoiceAdmin(admin.ModelAdmin):
     def invoice(self, o):
         return "Invoice {}".format(o.id)
     
-    fields = ['client', 'date', 'total']
+    fields = ['client', 'vendor', 'date', 'total']
     readonly_fields = ['total']
     
     actions = ['update_totals']
     
     inlines = [HourlyServiceInline, FixedServiceInline, ExpenseInline, PaymentInline, CreditInline, RelatedPDFInline]
-    list_filter = ['client__name', PaidListFilter]
-    list_display = ('__str__', 'client', 'date', 'total_charges', 'total_credits', 'total')
-    
+    list_filter = ['vendor__name', 'client__name', PaidListFilter]
+    list_display = ('__str__', 'vendor', 'client', 'date', 'total_charges', 'total_credits', 'total')
     
     def update_totals(self, request, queryset):
         for invoice in queryset:
@@ -86,6 +85,9 @@ class InvoiceAdmin(admin.ModelAdmin):
         invoice.update_totals()
         invoice.save()
 
+class VendorAdmin(admin.ModelAdmin):
+    pass
 
 admin.site.register(Client, ClientAdmin)    
 admin.site.register(Invoice, InvoiceAdmin)
+admin.site.register(Vendor, VendorAdmin)
