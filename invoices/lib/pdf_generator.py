@@ -15,6 +15,7 @@ from invoices.lib.pdf_styles import accent_color, line_item_date_format, table_i
 class InvoicePDFBuilder(object):
     def __init__(self, invoice):
         self.invoice = invoice
+        
         self.hourly_services = HourlyService.objects.filter(invoice=invoice).order_by('date')
         self.fixed_services = FixedService.objects.filter(invoice=invoice).order_by('date')
         self.expenses = Expense.objects.filter(invoice=invoice).order_by('date')
@@ -321,6 +322,10 @@ class InvoicePDFBuilder(object):
             canvas.setStrokeColor(colors.grey)
             canvas.line(.75 * inch, top_section_bottom - .15*inch, 7.75*inch, top_section_bottom - .15*inch)
             
+            canvas.setAuthor("Adam M Peacock")
+            canvas.setSubject("Invoice")
+            canvas.setTitle("Invoice {}".format(self.invoice.id))
+            
             canvas.restoreState()
         
         def onLaterPages(canvas, doc):
@@ -348,9 +353,10 @@ class InvoicePDFBuilder(object):
             canvas.restoreState()
         
         doc = SimpleDocTemplate(output, leftMargin = .75 * inch, rightMargin = .75 * inch, pagesize=(8.5*inch, 11*inch), topMargin=1.25*inch)
+        
         story = list(self.get_story())
         doc.build(story, onFirstPage=onFirstPage, onLaterPages=onLaterPages)
-    
+        
     def get_total_items(self):
         table = []
         
