@@ -21,12 +21,6 @@ class Client(models.Model):
     
     def __str__(self):
         return self.name
-
-class Vendor(models.Model):
-    phone = models.CharField(max_length=50, blank=True)
-    email = models.EmailField(max_length=254, blank=True)
-    
-    address = models.TextField(blank=True)
     
 
 class Invoice(models.Model):
@@ -92,7 +86,6 @@ class Invoice(models.Model):
         self.total_credits = sum([getattr(self, attr) for attr in CREDIT_ATTRS]) * -1
         
         self.total = self.total_charges - self.total_credits
-
     
     def get_absolute_url(self):
         return reverse('invoices.views.invoice', kwargs={'id': self.id})
