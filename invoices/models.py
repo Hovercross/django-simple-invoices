@@ -4,9 +4,6 @@ from decimal import Decimal
 from django.db import models
 from django.core.urlresolvers import reverse
 
-from polymorphic.models import PolymorphicModel
-
-
 def uuidUpload(instance, filename):
     name, ext = os.path.splitext(filename)
     
@@ -25,18 +22,25 @@ class Client(models.Model):
     def __str__(self):
         return self.name
 
+class Vendor(models.Model):
+    phone = models.CharField(max_length=50, blank=True)
+    email = models.EmailField(max_length=254, blank=True)
+    
+    address = models.TextField(blank=True)
+    
+
 class Invoice(models.Model):
     client = models.ForeignKey(Client)
     date = models.DateField(blank=True, null=True)
     finalized = models.BooleanField(default=False)
     
-    hourly_services_total = models.DecimalField(max_digits=20, decimal_places=2)
-    fixed_services_total = models.DecimalField(max_digits=20, decimal_places=2)
-    expense_total = models.DecimalField(max_digits=20, decimal_places=2)
-    payment_total = models.DecimalField(max_digits=20, decimal_places=2)
-    credit_total = models.DecimalField(max_digits=20, decimal_places=2)
+    hourly_services_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    fixed_services_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    expense_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    payment_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    credit_total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     
-    total = models.DecimalField(max_digits=20, decimal_places=2)
+    total = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     
     ordering = ['client__name', 'date']
     
@@ -103,15 +107,15 @@ class ReverseDisplayTotalMixin(object):
         
         return "-"
     
-class LineItem(PolymorphicModel):    
+class LineItem(models.Model):
     invoice = models.ForeignKey(Invoice)
     date = models.DateField(blank=True, null=True)
     description = models.CharField(max_length=255, blank=True)
     
     total = models.DecimalField(max_digits=20, decimal_places=2)
     
-    def __str__(self):
-        return self.description
+    class Meta:
+        abstract = True
 
 class HourlyService(LineItem, DisplayTotalMixin):
     location = models.CharField(max_length=255, blank=True, null=True)

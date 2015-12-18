@@ -8,14 +8,13 @@ import invoices.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
     ]
 
     operations = [
         migrations.CreateModel(
             name='Client',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
                 ('name', models.CharField(max_length=50)),
                 ('address', models.TextField(blank=True)),
             ],
@@ -24,60 +23,54 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='Invoice',
+            name='Credit',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
-                ('date', models.DateField(null=True, blank=True)),
-                ('finalized', models.BooleanField(default=False)),
-                ('client', models.ForeignKey(to='invoices.Client')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='LineItem',
-            fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
                 ('date', models.DateField(null=True, blank=True)),
                 ('description', models.CharField(max_length=255, blank=True)),
                 ('total', models.DecimalField(decimal_places=2, max_digits=20)),
+                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
             ],
             options={
                 'abstract': False,
             },
-        ),
-        migrations.CreateModel(
-            name='RelatedPDF',
-            fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, auto_created=True, verbose_name='ID')),
-                ('pdf', models.FileField(upload_to=invoices.models.uuidUpload, verbose_name='PDF')),
-                ('invoice', models.ForeignKey(to='invoices.Invoice')),
-            ],
+            bases=(models.Model, invoices.models.ReverseDisplayTotalMixin),
         ),
         migrations.CreateModel(
             name='Expense',
             fields=[
-                ('lineitem_ptr', models.OneToOneField(serialize=False, parent_link=True, auto_created=True, to='invoices.LineItem', primary_key=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('date', models.DateField(null=True, blank=True)),
+                ('description', models.CharField(max_length=255, blank=True)),
+                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
                 ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
             ],
             options={
                 'abstract': False,
             },
-            bases=('invoices.lineitem',),
+            bases=(models.Model, invoices.models.DisplayTotalMixin),
         ),
         migrations.CreateModel(
             name='FixedService',
             fields=[
-                ('lineitem_ptr', models.OneToOneField(serialize=False, parent_link=True, auto_created=True, to='invoices.LineItem', primary_key=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('date', models.DateField(null=True, blank=True)),
+                ('description', models.CharField(max_length=255, blank=True)),
+                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
                 ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
             ],
             options={
                 'abstract': False,
             },
-            bases=('invoices.lineitem',),
+            bases=(models.Model, invoices.models.DisplayTotalMixin),
         ),
         migrations.CreateModel(
             name='HourlyService',
             fields=[
-                ('lineitem_ptr', models.OneToOneField(serialize=False, parent_link=True, auto_created=True, to='invoices.LineItem', primary_key=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('date', models.DateField(null=True, blank=True)),
+                ('description', models.CharField(max_length=255, blank=True)),
+                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
                 ('location', models.CharField(max_length=255, null=True, blank=True)),
                 ('hours', models.DecimalField(decimal_places=3, max_digits=11)),
                 ('rate', models.DecimalField(decimal_places=2, max_digits=10)),
@@ -85,27 +78,73 @@ class Migration(migrations.Migration):
             options={
                 'abstract': False,
             },
-            bases=('invoices.lineitem',),
+            bases=(models.Model, invoices.models.DisplayTotalMixin),
+        ),
+        migrations.CreateModel(
+            name='Invoice',
+            fields=[
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('date', models.DateField(null=True, blank=True)),
+                ('finalized', models.BooleanField(default=False)),
+                ('hourly_services_total', models.DecimalField(decimal_places=2, max_digits=20)),
+                ('fixed_services_total', models.DecimalField(decimal_places=2, max_digits=20)),
+                ('expense_total', models.DecimalField(decimal_places=2, max_digits=20)),
+                ('payment_total', models.DecimalField(decimal_places=2, max_digits=20)),
+                ('credit_total', models.DecimalField(decimal_places=2, max_digits=20)),
+                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
+                ('client', models.ForeignKey(to='invoices.Client')),
+            ],
         ),
         migrations.CreateModel(
             name='Payment',
             fields=[
-                ('lineitem_ptr', models.OneToOneField(serialize=False, parent_link=True, auto_created=True, to='invoices.LineItem', primary_key=True)),
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('date', models.DateField(null=True, blank=True)),
+                ('description', models.CharField(max_length=255, blank=True)),
+                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
                 ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
+                ('invoice', models.ForeignKey(to='invoices.Invoice')),
             ],
             options={
                 'abstract': False,
             },
-            bases=('invoices.lineitem',),
+            bases=(models.Model, invoices.models.ReverseDisplayTotalMixin),
+        ),
+        migrations.CreateModel(
+            name='RelatedPDF',
+            fields=[
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('pdf', models.FileField(verbose_name='PDF', upload_to=invoices.models.uuidUpload)),
+                ('invoice', models.ForeignKey(to='invoices.Invoice')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Vendor',
+            fields=[
+                ('id', models.AutoField(primary_key=True, auto_created=True, verbose_name='ID', serialize=False)),
+                ('phone', models.CharField(max_length=50, blank=True)),
+                ('email', models.EmailField(max_length=254, blank=True)),
+                ('address', models.TextField(blank=True)),
+            ],
         ),
         migrations.AddField(
-            model_name='lineitem',
+            model_name='hourlyservice',
             name='invoice',
             field=models.ForeignKey(to='invoices.Invoice'),
         ),
         migrations.AddField(
-            model_name='lineitem',
-            name='polymorphic_ctype',
-            field=models.ForeignKey(null=True, editable=False, to='contenttypes.ContentType', related_name='polymorphic_invoices.lineitem_set+'),
+            model_name='fixedservice',
+            name='invoice',
+            field=models.ForeignKey(to='invoices.Invoice'),
+        ),
+        migrations.AddField(
+            model_name='expense',
+            name='invoice',
+            field=models.ForeignKey(to='invoices.Invoice'),
+        ),
+        migrations.AddField(
+            model_name='credit',
+            name='invoice',
+            field=models.ForeignKey(to='invoices.Invoice'),
         ),
     ]

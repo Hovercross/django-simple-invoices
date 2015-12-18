@@ -1,7 +1,6 @@
 from django.contrib import admin
 
 from invoices.models import LineItem, Client, Invoice, HourlyService, FixedService, Expense, Payment, RelatedPDF, Credit
-from polymorphic.admin import PolymorphicParentModelAdmin, PolymorphicChildModelAdmin
 
 class PaidListFilter(admin.SimpleListFilter):
     title = "paid"
@@ -19,8 +18,6 @@ class PaidListFilter(admin.SimpleListFilter):
             return queryset.exclude(total = 0)
         
 
-class LineItemParentAdmin(PolymorphicParentModelAdmin):
-    base_model = LineItem
 
 class InlineBase(admin.TabularInline):
     extra = 0
