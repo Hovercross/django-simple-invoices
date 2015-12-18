@@ -70,7 +70,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     
     inlines = [HourlyServiceInline, FixedServiceInline, ExpenseInline, PaymentInline, CreditInline, RelatedPDFInline]
     list_filter = ['client__name', PaidListFilter]
-    list_display = ('invoice', 'client', 'date', 'total_charges', 'total_credits', 'total')
+    list_display = ('__str__', 'client', 'date', 'total_charges', 'total_credits', 'total')
     
     
     def update_totals(self, request, queryset):
@@ -85,7 +85,6 @@ class InvoiceAdmin(admin.ModelAdmin):
         invoice = form.instance
         invoice.update_totals()
         invoice.save()
-    
 
 
 admin.site.register(Client, ClientAdmin)    
