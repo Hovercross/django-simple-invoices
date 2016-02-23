@@ -6,7 +6,16 @@ from invoices.models import Invoice
 from invoices.lib.pdf_generator import InvoicePDFBuilder
 
 @login_required
-def invoice(request, uuid):
+def invoice_private(request, id):
+    invoice = get_object_or_404(Invoice, pk=id)
+    
+    builder = InvoicePDFBuilder(invoice)
+    response = HttpResponse(content_type='application/pdf')
+    builder.build_pdf(response)
+    
+    return response
+
+def invoice_public(request, uuid):
     invoice = get_object_or_404(Invoice, uuid=uuid)
     
     if not invoice.public:
