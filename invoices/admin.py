@@ -63,7 +63,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     def invoice(self, o):
         return "Invoice {}".format(o.id)
     
-    fields = ['client', 'vendor', 'date', 'total']
+    fields = ['client', 'vendor', 'date', 'total', 'public']
     readonly_fields = ['total']
     
     actions = ['update_totals']

@@ -40,6 +40,9 @@ class Invoice(models.Model):
     client = models.ForeignKey(Client)
     vendor = models.ForeignKey(Vendor)
     
+    uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    public = models.BooleanField(default=False)
+    
     date = models.DateField(blank=True, null=True)
     finalized = models.BooleanField(default=False)
     
@@ -101,9 +104,6 @@ class Invoice(models.Model):
         self.total_credits = sum([getattr(self, attr) for attr in CREDIT_ATTRS]) * -1
         
         self.total = self.total_charges - self.total_credits
-    
-    def get_absolute_url(self):
-        return reverse('invoices.views.invoice', kwargs={'id': self.id})
     
     def __str__(self):
         return "{id} - {client}".format(id=self.id, client=self.client)

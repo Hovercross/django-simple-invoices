@@ -1,0 +1,11 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+{% block object-tools-items %}
+  {% if original.public and original.uuid %}
+    <li>
+      <a href="{% url 'invoice-pdf' uuid=original.uuid %}">Public PDF</a>
+    </li>
+  {% endif %}
+  
+  {{ block.super }}
+{% endblock %}
