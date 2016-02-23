@@ -1,6 +1,6 @@
 dj-database-url==0.4.0
 Django==1.9.2
--e git+https://github.com/Hovercross/django-admin-sortable.git@bbb88d57ab818d8345b0864bfcf2deefac227e41#egg=django_admin_sortable
+-e git+https://github.com/Hovercross/django-admin-sortable.git@b5fc6548df36b8f032e50a7f83f175114e8bce9a#egg=django_admin_sortable
 Pillow==3.1.1
 PyPDF2==1.25.1
 reportlab==3.3.0
