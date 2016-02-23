@@ -63,14 +63,14 @@ class InvoiceAdmin(admin.ModelAdmin):
     def invoice(self, o):
         return "Invoice {}".format(o.id)
     
-    fields = ['client', 'vendor', 'date', 'total', 'public']
+    fields = ['client', 'vendor', 'date', 'description', 'total', 'public']
     readonly_fields = ['total']
     
     actions = ['update_totals']
     
     inlines = [HourlyServiceInline, FixedServiceInline, ExpenseInline, PaymentInline, CreditInline, RelatedPDFInline]
     list_filter = ['vendor__name', 'client__name', PaidListFilter]
-    list_display = ('__str__', 'vendor', 'client', 'date', 'total_charges', 'total_credits', 'total')
+    list_display = ('__str__', 'vendor', 'client', 'date', 'description', 'total')
     
     def update_totals(self, request, queryset):
         for invoice in queryset:

@@ -39,6 +39,7 @@ class Vendor(models.Model):
 class Invoice(models.Model):
     client = models.ForeignKey(Client)
     vendor = models.ForeignKey(Vendor)
+    description = models.CharField(max_length=254, blank=True)
     
     uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     public = models.BooleanField(default=False)
