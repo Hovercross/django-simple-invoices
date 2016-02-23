@@ -19,11 +19,11 @@ class InvoicePDFBuilder(object):
     def __init__(self, invoice):
         self.invoice = invoice
         
-        self.hourly_services = HourlyService.objects.filter(invoice=invoice).order_by('date')
-        self.fixed_services = FixedService.objects.filter(invoice=invoice).order_by('date')
-        self.expenses = Expense.objects.filter(invoice=invoice).order_by('date')
-        self.payments = Payment.objects.filter(invoice=invoice).order_by('date')
-        self.credits = Credit.objects.filter(invoice=invoice).order_by('date')
+        self.hourly_services = HourlyService.objects.filter(invoice=invoice)
+        self.fixed_services = FixedService.objects.filter(invoice=invoice)
+        self.expenses = Expense.objects.filter(invoice=invoice)
+        self.payments = Payment.objects.filter(invoice=invoice)
+        self.credits = Credit.objects.filter(invoice=invoice)
         
         self.pdf_includes = RelatedPDF.objects.filter(invoice=invoice)
     

@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from adminsortable.admin import SortableStackedInline, NonSortableParentAdmin, SortableTabularInline
+
 from invoices.models import Client, Vendor, Invoice, HourlyService, FixedService, Expense, Payment, RelatedPDF, Credit
 
 class PaidListFilter(admin.SimpleListFilter):
@@ -22,44 +24,47 @@ class PaidListFilter(admin.SimpleListFilter):
 class InlineBase(admin.TabularInline):
     extra = 0
 
+class SortableInlineBase(SortableTabularInline):
+    extra = 0
+
 # Register your models here.
 class ClientAdmin(admin.ModelAdmin):
     pass
     
-class HourlyServiceInline(InlineBase):
+class HourlyServiceInline(SortableInlineBase):
     model = HourlyService
     
     fields = ['date', 'description', 'location', 'hours', 'rate', 'display_total']
     readonly_fields = ['display_total']
 
-class FixedServiceInline(InlineBase):
+class FixedServiceInline(SortableInlineBase):
     model = FixedService
     
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
-class ExpenseInline(InlineBase):
+class ExpenseInline(SortableInlineBase):
     model = Expense
     
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
-class PaymentInline(InlineBase):
+class PaymentInline(SortableInlineBase):
     model = Payment
     
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
-class CreditInline(InlineBase):
+class CreditInline(SortableInlineBase):
     model = Credit
         
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
-class RelatedPDFInline(InlineBase):
+class RelatedPDFInline(SortableInlineBase):
     model = RelatedPDF
 
-class InvoiceAdmin(admin.ModelAdmin):
+class InvoiceAdmin(NonSortableParentAdmin):
     def invoice(self, o):
         return "Invoice {}".format(o.id)
     
@@ -84,7 +89,9 @@ class InvoiceAdmin(admin.ModelAdmin):
         invoice = form.instance
         invoice.update_totals()
         invoice.save()
-
+    
+    change_form_template_extends = 'admin/invoices/invoice/change_form.html'
+    
 class VendorAdmin(admin.ModelAdmin):
     pass
 
