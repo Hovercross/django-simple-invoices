@@ -12,23 +12,49 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import configparser
+import email.utils
+
+import dj_database_url
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+config = configparser.ConfigParser()
 
+#Fallback config file
+default_config_file_path = os.path.abspath(os.path.join(BASE_DIR, "..", "settings.ini"))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
+#Actual config file
+CONFIG_FILE = os.environ.get("DJANGO_CONFIG_FILE", default_config_file_path)
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'jte#2f23+u5=k21-#zmh%*9gg)&98(76ij4eze^p+h+)ikcafm'
+#Read the config file
+config.read(CONFIG_FILE)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DATABASE_URL = config['database']['URL']
 
-ALLOWED_HOSTS = []
+DEBUG = config.getboolean('debug', 'DEBUG')
 
+MEDIA_ROOT = config['files']['MEDIA_ROOT']
+STATIC_ROOT = config['files']['STATIC_ROOT']
 
-# Application definition
+MEDIA_URL = config['urls']['MEDIA_URL']
+STATIC_URL = config['urls']['STATIC_URL']
+
+SERVE_STATIC = config.getboolean('debug', 'SERVE_STATIC')
+ALLOWED_HOSTS = [host.strip() for host in config['production'].get('ALLOWED_HOSTS', "").split(",")]
+
+STATICFILES_STORAGE = config['files']['STORAGE']
+
+EMAIL_BACKEND = config['email'].get('BACKEND', 'django.core.mail.backends.console.EmailBackend')
+SERVER_EMAIL = config['email'].get('SERVER_ADDRESS', 'root@localhost')
+
+TIME_ZONE = config['internationalization']['TIME_ZONE']
+LANGUAGE_CODE = config['internationalization']['LANGUAGE_CODE']
+
+ADMINS = [email.utils.parseaddr(a.strip()) for a in config['email']['ERRORS'].split(",")]
+MANAGERS = [email.utils.parseaddr(a.strip()) for a in config['email']['MANAGERS'].split(",")]
+
+DATABASES = {'default': dj_database_url.config(default=DATABASE_URL)}
+SECRET_KEY = config['django']['SECRET_KEY']
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -71,33 +97,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
-
-# Internationalization
-# https://docs.djangoproject.com/en/1.8/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
-
-STATIC_URL = '/static/'
