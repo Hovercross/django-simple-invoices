@@ -187,6 +187,7 @@ class Credit(LineItem, ReverseDisplayTotalMixin):
         
 class RelatedPDF(SortableMixin):
     invoice = SortableForeignKey(Invoice)
+    description = models.CharField(max_length=254, blank=True)
     
     pdf_order = models.PositiveIntegerField(default=0, editable=False, db_index=True)
     
