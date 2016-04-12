@@ -1,9 +1,45 @@
+from datetime import timedelta
+from decimal import Decimal
+
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 
-from invoices.models import Invoice
+from invoices.models import Invoice, Client, HourlyService
 from invoices.lib.pdf_generator import InvoicePDFBuilder
+
+def get_monday(date):
+    return date - timedelta(days=date.weekday())
+
+
+def get_previous_day_of_week(date, dow):
+    #Naive implementation
+    while date.weekday() != dow:
+        date = date - timedelta(days=1)
+
+    return date
+
+@login_required
+def client_weekly_hours(request, client_id):
+    client = get_object_or_404(Client, pk=client_id)
+
+    hourly_services = HourlyService.objects.filter(invoice__client=client)
+
+    week_hours = {}
+
+    for service in hourly_services:
+        if not service.date:
+            continue
+
+        sunday = get_previous_day_of_week(service.date, 6)
+
+        if not sunday in week_hours:
+            week_hours[sunday] = Decimal()
+        week_hours[sunday] += service.hours
+
+    return HttpResponse("\n".join(["{week:}: {hours:}".format(week=sunday.strftime("%Y-%m-%d"), hours=week_hours[sunday]) for sunday in sorted(week_hours.keys())]), content_type="text/plain")
+
+
 
 @login_required
 def invoice_private(request, id):
