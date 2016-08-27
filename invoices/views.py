@@ -45,8 +45,11 @@ def client_weekly_hours(request, client_id):
 def invoice_private(request, id):
     invoice = get_object_or_404(Invoice, pk=id)
     
+    filename = "Invoice {id:} - {vendor:} - {client:}".format(id=invoice.id, client=invoice.client.name, vendor=invoice.vendor.name)
+    
     builder = InvoicePDFBuilder(invoice)
     response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'filename="{}"'.format(filename)
     builder.build_pdf(response)
     
     return response
@@ -54,12 +57,15 @@ def invoice_private(request, id):
 def invoice_public(request, uuid):
     invoice = get_object_or_404(Invoice, uuid=uuid)
     
+    filename = "Invoice {id:} - {vendor:} - {client:}".format(id=invoice.id, client=invoice.client.name, vendor=invoice.vendor.name)
+    
     if not invoice.public:
         return HttpResponseForbidden("Invoice is not public")
     
     builder = InvoicePDFBuilder(invoice)
     
     response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'filename="{}"'.format(filename)
     
     builder.build_pdf(response)
     
