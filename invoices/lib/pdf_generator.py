@@ -449,7 +449,6 @@ class InvoicePDFBuilder(object):
         
         item_lists = map(list, [self.get_hourly_story_items(), 
                       self.get_fixed_service_story_items(),
-                      self.get_fixed_service_story_items(),
                       self.get_expense_story_items(),
                       self.get_credit_story_items(),
                       self.get_payment_story_items(),
