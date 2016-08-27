@@ -447,28 +447,29 @@ class InvoicePDFBuilder(object):
 
         yield Spacer(1, first_page_buffer - 1.15 * inch)
         
-        hourly_story_items = list(self.get_hourly_story_items())
-        if hourly_story_items:
-            yield KeepTogether(hourly_story_items + [Spacer(1, .5*inch)])
+        item_lists = map(list, [self.get_hourly_story_items(), 
+                      self.get_fixed_service_story_items(),
+                      self.get_fixed_service_story_items(),
+                      self.get_expense_story_items(),
+                      self.get_credit_story_items(),
+                      self.get_payment_story_items(),
+                      self.get_total_items()])
+        
+        # Remove the empty lists
+        item_lists = [l for l in item_lists if len(l) > 0]
+        item_count = len(item_lists)
+        
+        for i, item_list in enumerate(map(list, item_lists)):
             
-        
-        fixed_service_items = list(self.get_fixed_service_story_items())
-        if fixed_service_items:
-            yield KeepTogether(fixed_service_items + [Spacer(1, .5*inch)])
-        
-        expense_items = list(self.get_expense_story_items())
-        if expense_items:
-            yield KeepTogether(expense_items + [Spacer(1, .5*inch)])
-    
-        credit_items = list(self.get_credit_story_items())
-        if credit_items:
-            yield KeepTogether(credit_items + [Spacer(1, .5*inch)])
-        
-        payment_items = list(self.get_payment_story_items())
-        if payment_items:
-            yield KeepTogether(payment_items + [Spacer(1, .5*inch)])
-        
-        total_items = list(self.get_total_items())
-        if total_items:
-            yield KeepTogether(total_items)
-        
+            if i == 0: # First item
+                for item in item_list:
+                    yield item
+                
+                yield Spacer(1, .5*inch)
+            
+            elif i == item_count - 1: # Last item
+                yield KeepTogether(item_list)
+            
+            else: # Middle items
+                yield KeepTogether(item_list + [Spacer(1, .5*inch)])
+            
