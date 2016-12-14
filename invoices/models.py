@@ -74,7 +74,7 @@ class Invoice(models.Model):
         #Track both total hours and total dollars, along with the seen rates. We'll decide what to do at the end.
         for hourly_service in hourly_services:
             rates.add(hourly_service.rate)
-            total_hours += hourly_service.hours
+            total_hours += Decimal(hourly_service.duration.total_seconds()) / 3600
             total_dollars += hourly_service.total
         
         if len(rates) == 0:
@@ -149,11 +149,11 @@ class LineItem(SortableMixin):
     
 class HourlyService(LineItem, DisplayTotalMixin):
     location = models.CharField(max_length=255, blank=True, null=True)
-    hours = models.DecimalField(max_digits=11, decimal_places=3)
     rate = models.DecimalField(max_digits=10, decimal_places=2)
-    
+    duration = models.DurationField(null=True)
+
     def save(self, *args, **kwargs):
-        self.total = self.hours * self.rate
+        self.total = Decimal(self.duration.total_seconds) / 3600 * self.rate
         super().save(*args, **kwargs)
     
     

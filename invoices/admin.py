@@ -34,7 +34,7 @@ class ClientAdmin(admin.ModelAdmin):
 class HourlyServiceInline(SortableInlineBase):
     model = HourlyService
     
-    fields = ['date', 'description', 'location', 'hours', 'rate', 'display_total']
+    fields = ['date', 'description', 'location', 'duration', 'rate', 'display_total']
     readonly_fields = ['display_total']
 
 class FixedServiceInline(SortableInlineBase):
