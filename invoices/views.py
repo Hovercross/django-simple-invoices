@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 from invoices.models import Invoice, Client, HourlyService
 from invoices.lib.pdf_generator import InvoicePDFBuilder
 
+from datetime import timedelta
+
 def get_monday(date):
     return date - timedelta(days=date.weekday())
 
@@ -34,8 +36,8 @@ def client_weekly_hours(request, client_id):
         sunday = get_previous_day_of_week(service.date, 6)
 
         if not sunday in week_hours:
-            week_hours[sunday] = Decimal()
-        week_hours[sunday] += service.hours
+            week_hours[sunday] = timedelta()
+        week_hours[sunday] += service.duration
 
     return HttpResponse("\n".join(["{week:}: {hours:}".format(week=sunday.strftime("%Y-%m-%d"), hours=week_hours[sunday]) for sunday in sorted(week_hours.keys())]), content_type="text/plain")
 
