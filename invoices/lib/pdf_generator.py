@@ -15,6 +15,8 @@ from PyPDF2 import PdfFileWriter, PdfFileReader, PdfFileMerger
 from invoices.models import HourlyService, FixedService, Expense, Payment, Credit, RelatedPDF
 from invoices.lib.pdf_styles import accent_color, line_item_date_format, table_item_style, table_item_style_right, table_header_style, table_header_style_right, table_name_style, default_table_style, table_total_style
 
+from datetime import timedelta
+
 class InvoicePDFBuilder(object):
     def __init__(self, invoice):
         self.invoice = invoice
@@ -156,7 +158,7 @@ class InvoicePDFBuilder(object):
             
             uniform_rate_value = self.hourly_services.values('rate')[0]['rate']
             
-        total_hours = Decimal(0)
+        total_hours = timedelta()
             
         for hourly_service in self.hourly_services:
             if not uniform_rate:
@@ -164,7 +166,7 @@ class InvoicePDFBuilder(object):
                     hourly_service.date and Paragraph(hourly_service.date.strftime(line_item_date_format), table_item_style) or None,
                     hourly_service.location and Paragraph(hourly_service.location, table_item_style) or None,
                     hourly_service.description and Paragraph(hourly_service.description, table_item_style) or None,
-                    hourly_service.hours and Paragraph("{:0.3f}".format(hourly_service.hours), table_item_style_right) or None,
+                    hourly_service.duration and Paragraph(str(hourly_service.duration), table_item_style_right) or None,
                     hourly_service.rate and Paragraph("{:0.2f}".format(hourly_service.rate), table_item_style_right) or None,
                     Paragraph(hourly_service.display_total, table_item_style_right)
                 ])
@@ -174,10 +176,10 @@ class InvoicePDFBuilder(object):
                     hourly_service.date and Paragraph(hourly_service.date.strftime(line_item_date_format), table_item_style) or None,
                     hourly_service.location and Paragraph(hourly_service.location, table_item_style) or None,
                     hourly_service.description and Paragraph(hourly_service.description, table_item_style) or None,
-                    hourly_service.hours and Paragraph("{:0.3f}".format(hourly_service.hours), table_item_style_right) or None,
+                    hourly_service.duration and Paragraph(str(hourly_service.duration), table_item_style_right) or None,
                 ])
                 
-                total_hours += hourly_service.hours
+                total_hours += hourly_service.duration
         
         table_style = []
         table_style.extend(default_table_style)
@@ -187,7 +189,7 @@ class InvoicePDFBuilder(object):
                 Paragraph("Total Hours", table_total_style),
                 None,
                 None,
-                Paragraph("{:.3f}".format(total_hours), table_total_style)
+                Paragraph(str(total_hours), table_total_style)
             ])
             
             table.append([
