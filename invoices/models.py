@@ -153,7 +153,7 @@ class HourlyService(LineItem, DisplayTotalMixin):
     duration = models.DurationField(null=True)
 
     def save(self, *args, **kwargs):
-        self.total = Decimal(self.duration.total_seconds) / 3600 * self.rate
+        self.total = Decimal(self.duration.total_seconds()) / 3600 * self.rate
         super().save(*args, **kwargs)
     
     
