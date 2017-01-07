@@ -166,7 +166,7 @@ class InvoicePDFBuilder(object):
                     hourly_service.date and Paragraph(hourly_service.date.strftime(line_item_date_format), table_item_style) or None,
                     hourly_service.location and Paragraph(hourly_service.location, table_item_style) or None,
                     hourly_service.description and Paragraph(hourly_service.description, table_item_style) or None,
-                    hourly_service.duration and Paragraph(str(hourly_service.duration), table_item_style_right) or None,
+                    hourly_service.duration and Paragraph(format_duration(hourly_service.duration), table_item_style_right) or None,
                     hourly_service.rate and Paragraph("{:0.2f}".format(hourly_service.rate), table_item_style_right) or None,
                     Paragraph(hourly_service.display_total, table_item_style_right)
                 ])
@@ -176,7 +176,7 @@ class InvoicePDFBuilder(object):
                     hourly_service.date and Paragraph(hourly_service.date.strftime(line_item_date_format), table_item_style) or None,
                     hourly_service.location and Paragraph(hourly_service.location, table_item_style) or None,
                     hourly_service.description and Paragraph(hourly_service.description, table_item_style) or None,
-                    hourly_service.duration and Paragraph(str(hourly_service.duration), table_item_style_right) or None,
+                    hourly_service.duration and Paragraph(format_duration(hourly_service.duration), table_item_style_right) or None,
                 ])
                 
                 total_hours += hourly_service.duration
@@ -189,7 +189,7 @@ class InvoicePDFBuilder(object):
                 Paragraph("Total Hours", table_total_style),
                 None,
                 None,
-                Paragraph(str(total_hours), table_total_style)
+                Paragraph(format_duration(total_hours), table_total_style)
             ])
             
             table.append([
@@ -474,3 +474,31 @@ class InvoicePDFBuilder(object):
             else: # Middle items
                 yield KeepTogether(item_list + [Spacer(1, .5*inch)])
             
+def format_duration(duration = None, total_seconds = 0):
+  remaining_seconds = total_seconds
+  negative = False
+  
+  if (duration):
+    remaining_seconds = duration.total_seconds() + total_seconds
+  
+  # Convert everything to a positive number for the formatting,
+  # then we will handle the sign at the end
+  if remaining_seconds < 0:
+    negative = True
+    remaining_seconds = abs(remaining_seconds)
+    
+  # Pull hours out of seconds
+  hours = int(remaining_seconds / 3600)
+  remaining_seconds -= hours * 3600
+  
+  # Pull out minutes
+  minutes = int(remaining_seconds / 60)
+  remaining_seconds -= minutes * 60
+  
+  # Seconds are all that is left
+  seconds = int(remaining_seconds)
+  
+  if negative:
+    return "({:02d}:{:02d}:{:02d})".format(hours, minutes, seconds)
+  
+  return "{:02d}:{:02d}:{:02d}".format(hours, minutes, seconds)
