@@ -68,13 +68,13 @@ class Invoice(models.Model):
         hourly_services = HourlyService.objects.filter(invoice=self)
         
         rates = set()
-        total_hours = Decimal()
+        total_seconds = Decimal(0)
         total_dollars = Decimal()
         
         #Track both total hours and total dollars, along with the seen rates. We'll decide what to do at the end.
         for hourly_service in hourly_services:
             rates.add(hourly_service.rate)
-            total_hours += Decimal(hourly_service.duration.total_seconds()) / 3600
+            total_seconds += Decimal(hourly_service.duration.total_seconds())
             total_dollars += hourly_service.total
         
         if len(rates) == 0:
@@ -82,7 +82,7 @@ class Invoice(models.Model):
         elif len(rates) == 1:
             #Aggregated hours
             rate = rates.pop()
-            self.hourly_services_total = round(round(total_hours, 3) * rate, 2)
+            self.hourly_services_total = round(total_seconds/3600 * rate, 2)
         else:
             self.hourly_services_total = total_dollars
         
