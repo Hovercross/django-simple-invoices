@@ -34,6 +34,9 @@ ALLOWED_HOSTS = os.environ['ALLOWED_HOSTS'].split()
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 SERVER_EMAIL = os.environ.get('SERVER_ADDRESS', 'root@localhost')
 
