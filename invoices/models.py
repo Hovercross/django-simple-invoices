@@ -130,7 +130,7 @@ class LineItem(models.Model):
     date = models.DateField(blank=True, null=True)
     description = models.CharField(max_length=255, blank=True)
     
-    position = models.PositiveIntegerField(default=0, editable=False, db_index=True)
+    position = models.PositiveIntegerField(default=0, db_index=True)
     
     total = models.DecimalField(max_digits=20, decimal_places=2)
     
@@ -186,7 +186,7 @@ class RelatedPDF(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     description = models.CharField(max_length=254, blank=True)
     
-    position = models.PositiveIntegerField(default=0, editable=False, db_index=True)
+    position = models.PositiveIntegerField(default=0, db_index=True)
     
     pdf = models.FileField(upload_to=uuidUpload, verbose_name="PDF")
     

@@ -22,38 +22,41 @@ class PaidListFilter(admin.SimpleListFilter):
 
 class ClientAdmin(admin.ModelAdmin):
     pass
-    
-class HourlyServiceInline(SortableInlineAdminMixin, admin.TabularInline):
+
+class InlineBase(SortableInlineAdminMixin, admin.TabularInline):
+    extra = 0
+
+class HourlyServiceInline(InlineBase):
     model = HourlyService
     
     fields = ['date', 'description', 'location', 'duration', 'rate', 'display_total']
     readonly_fields = ['display_total']
 
-class FixedServiceInline(SortableInlineAdminMixin, admin.TabularInline):
+class FixedServiceInline(InlineBase):
     model = FixedService
     
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
-class ExpenseInline(SortableInlineAdminMixin, admin.TabularInline):
+class ExpenseInline(InlineBase):
     model = Expense
     
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
-class PaymentInline(SortableInlineAdminMixin, admin.TabularInline):
+class PaymentInline(InlineBase):
     model = Payment
     
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
-class CreditInline(SortableInlineAdminMixin, admin.TabularInline):
+class CreditInline(InlineBase):
     model = Credit
         
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
-class RelatedPDFInline(SortableInlineAdminMixin, admin.TabularInline):
+class RelatedPDFInline(InlineBase):
     model = RelatedPDF
 
 class InvoiceAdmin(admin.ModelAdmin):
