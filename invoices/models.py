@@ -4,7 +4,7 @@ import uuid
 from decimal import Decimal
 
 from django.db import models
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 def uuidUpload(instance, filename):
     name, ext = os.path.splitext(filename)
@@ -37,8 +37,8 @@ class Vendor(models.Model):
     
 
 class Invoice(models.Model):
-    client = models.ForeignKey(Client)
-    vendor = models.ForeignKey(Vendor)
+    client = models.ForeignKey(Client, on_delete=models.DO_NOTHING)
+    vendor = models.ForeignKey(Vendor, on_delete=models.DO_NOTHING)
     description = models.CharField(max_length=254, blank=True)
     
     uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
@@ -126,7 +126,7 @@ class ReverseDisplayTotalMixin(object):
         return "-"
     
 class LineItem(models.Model):
-    invoice = models.ForeignKey(Invoice)
+    invoice = models.ForeignKey(Invoice, on_delete=models.DO_NOTHING)
     date = models.DateField(blank=True, null=True)
     description = models.CharField(max_length=255, blank=True)
     
