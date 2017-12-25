@@ -1,8 +1,10 @@
 astroid==1.6.0
+boto==2.48.0
 dj-database-url==0.4.0
 Django==1.11.8
 -e git+https://github.com/Hovercross/django-admin-sortable.git@b5fc6548df36b8f032e50a7f83f175114e8bce9a#egg=django_admin_sortable
 django-admin-sortable2==0.6.18
+django-ses==0.8.4
 django-storages==1.6.5
 envdir==0.7
 gunicorn==19.7.1
