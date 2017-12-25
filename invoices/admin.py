@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from adminsortable.admin import SortableStackedInline, NonSortableParentAdmin, SortableTabularInline
+from adminsortable2.admin import SortableInlineAdminMixin
 
 from invoices.models import Client, Vendor, Invoice, HourlyService, FixedService, Expense, Payment, RelatedPDF, Credit
 
@@ -20,51 +20,43 @@ class PaidListFilter(admin.SimpleListFilter):
             return queryset.exclude(total = 0)
         
 
-
-class InlineBase(admin.TabularInline):
-    extra = 0
-
-class SortableInlineBase(SortableTabularInline):
-    extra = 0
-
-# Register your models here.
 class ClientAdmin(admin.ModelAdmin):
     pass
     
-class HourlyServiceInline(SortableInlineBase):
+class HourlyServiceInline(SortableInlineAdminMixin, admin.TabularInline):
     model = HourlyService
     
     fields = ['date', 'description', 'location', 'duration', 'rate', 'display_total']
     readonly_fields = ['display_total']
 
-class FixedServiceInline(SortableInlineBase):
+class FixedServiceInline(SortableInlineAdminMixin, admin.TabularInline):
     model = FixedService
     
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
-class ExpenseInline(SortableInlineBase):
+class ExpenseInline(SortableInlineAdminMixin, admin.TabularInline):
     model = Expense
     
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
-class PaymentInline(SortableInlineBase):
+class PaymentInline(SortableInlineAdminMixin, admin.TabularInline):
     model = Payment
     
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
-class CreditInline(SortableInlineBase):
+class CreditInline(SortableInlineAdminMixin, admin.TabularInline):
     model = Credit
         
     fields = ['date', 'description', 'amount', 'display_total']
     readonly_fields = ['display_total']
 
-class RelatedPDFInline(SortableInlineBase):
+class RelatedPDFInline(SortableInlineAdminMixin, admin.TabularInline):
     model = RelatedPDF
 
-class InvoiceAdmin(NonSortableParentAdmin):
+class InvoiceAdmin(admin.ModelAdmin):
     def invoice(self, o):
         return "Invoice {}".format(o.id)
     

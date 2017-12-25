@@ -6,9 +6,6 @@ from decimal import Decimal
 from django.db import models
 from django.core.urlresolvers import reverse
 
-from adminsortable.fields import SortableForeignKey
-from adminsortable.models import SortableMixin
-
 def uuidUpload(instance, filename):
     name, ext = os.path.splitext(filename)
     
@@ -128,7 +125,7 @@ class ReverseDisplayTotalMixin(object):
         
         return "-"
     
-class LineItem(SortableMixin):
+class LineItem(models.Model):
     invoice = models.ForeignKey(Invoice)
     date = models.DateField(blank=True, null=True)
     description = models.CharField(max_length=255, blank=True)
@@ -185,16 +182,16 @@ class Credit(LineItem, ReverseDisplayTotalMixin):
         self.total = self.amount * -1
         super().save(*args, **kwargs)
         
-class RelatedPDF(SortableMixin):
-    invoice = SortableForeignKey(Invoice)
+class RelatedPDF(models.Model):
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     description = models.CharField(max_length=254, blank=True)
     
-    pdf_order = models.PositiveIntegerField(default=0, editable=False, db_index=True)
+    position = models.PositiveIntegerField(default=0, editable=False, db_index=True)
     
     pdf = models.FileField(upload_to=uuidUpload, verbose_name="PDF")
     
     class Meta:
-        ordering = ['pdf_order']
+        ordering = ['position']
     
     #TODO: Validate that the document is a PDF
     
