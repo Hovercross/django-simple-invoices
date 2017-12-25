@@ -18,43 +18,34 @@ import email.utils
 import dj_database_url
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-config = configparser.ConfigParser()
 
-#Fallback config file
-default_config_file_path = os.path.abspath(os.path.join(BASE_DIR, "..", "settings.ini"))
+DATABASE_URL = os.environ["DATABASE_URL"]
 
-#Actual config file
-CONFIG_FILE = os.environ.get("DJANGO_CONFIG_FILE", default_config_file_path)
+DEBUG = bool(os.environ.get('DEBUG', False))
+SERVE_STATIC = bool(os.environ.get('DEBUG', False))
 
-#Read the config file
-config.read(CONFIG_FILE)
+MEDIA_ROOT = os.environ['MEDIA_ROOT']
+STATIC_ROOT = os.environ['STATIC_ROOT']
 
-DATABASE_URL = config['database']['URL']
+MEDIA_URL = os.environ['MEDIA_URL']
+STATIC_URL = os.environ['STATIC_URL']
 
-DEBUG = config.getboolean('debug', 'DEBUG')
+ALLOWED_HOSTS = os.environ['ALLOWED_HOSTS'].split()
 
-MEDIA_ROOT = config['files']['MEDIA_ROOT']
-STATIC_ROOT = config['files']['STATIC_ROOT']
+STATICFILES_STORAGE = os.environ.get('STATICFILES_STORAGE', 'django.contrib.staticfiles.storage.StaticFilesStorage')
 
-MEDIA_URL = config['urls']['MEDIA_URL']
-STATIC_URL = config['urls']['STATIC_URL']
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+SERVER_EMAIL = os.environ.get('SERVER_ADDRESS', 'root@localhost')
 
-SERVE_STATIC = config.getboolean('debug', 'SERVE_STATIC')
-ALLOWED_HOSTS = [host.strip() for host in config['production'].get('ALLOWED_HOSTS', "").split(",")]
+ADMINS = [email.utils.parseaddr(a.strip()) for a in os.environ.get('ADMINS', '').split(",")]
+MANAGERS = [email.utils.parseaddr(a.strip()) for a in os.environ.get('MANAGERS', '').split(",")]
 
-STATICFILES_STORAGE = config['files']['STORAGE']
+SECRET_KEY = os.environ['SECRET_KEY']
 
-EMAIL_BACKEND = config['email'].get('BACKEND', 'django.core.mail.backends.console.EmailBackend')
-SERVER_EMAIL = config['email'].get('SERVER_ADDRESS', 'root@localhost')
-
-TIME_ZONE = config['internationalization']['TIME_ZONE']
-LANGUAGE_CODE = config['internationalization']['LANGUAGE_CODE']
-
-ADMINS = [email.utils.parseaddr(a.strip()) for a in config['email']['ERRORS'].split(",")]
-MANAGERS = [email.utils.parseaddr(a.strip()) for a in config['email']['MANAGERS'].split(",")]
+TIME_ZONE = 'America/New_York'
+LANGUAGE_CODE = 'en-US'
 
 DATABASES = {'default': dj_database_url.config(default=DATABASE_URL)}
-SECRET_KEY = config['django']['SECRET_KEY']
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -64,7 +55,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'invoices',
-    'adminsortable',
+    'adminsortable2',
 )
 
 MIDDLEWARE_CLASSES = (
