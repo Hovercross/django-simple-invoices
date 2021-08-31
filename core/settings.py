@@ -10,45 +10,46 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import os
-import configparser
-import email.utils
+from email.utils import getaddresses
+from pathlib import Path
 
-import dj_database_url
+import environ
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+env = environ.Env()
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = bool(os.environ.get('DEBUG', False))
-SERVE_STATIC = bool(os.environ.get('DEBUG', False))
+DEBUG = env.bool('DEBUG', default=False)
+SECRET_KEY = env('SECRET_KEY')
 
-MEDIA_ROOT = os.environ['MEDIA_ROOT']
-STATIC_ROOT = os.environ['STATIC_ROOT']
+DATABASES = {'default': env.db(default='sqlite:///' + (BASE_DIR / 'db.sqlite3').absolute().as_posix()), }
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
 
-MEDIA_URL = os.environ['MEDIA_URL']
-STATIC_URL = os.environ['STATIC_URL']
+# These are for DigitalOcean Spaces
+AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default=None)
+AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL", default=None)
+AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID", default=None)
+AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY", default=None)
+AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default=None)
 
-ALLOWED_HOSTS = os.environ['ALLOWED_HOSTS'].split()
+DEFAULT_FILE_STORAGE = env("DEFAULT_FILE_STORAGE", default="django.core.files.storage.FileSystemStorage")
+
+MEDIA_ROOT = BASE_DIR / "scratch" / "media"
+MEDIA_URL = env.str("MEDIA_URL", "/media/")
+
+STATIC_ROOT = BASE_DIR / "scratch" / "static"
+STATIC_URL = '/static/'
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+SERVER_EMAIL = env("SERVER_EMAIL", default="root@localhost")
 
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
-SERVER_EMAIL = os.environ.get('SERVER_ADDRESS', 'root@localhost')
-
-ADMINS = [email.utils.parseaddr(a.strip()) for a in os.environ.get('ADMINS', '').split(",")]
-MANAGERS = [email.utils.parseaddr(a.strip()) for a in os.environ.get('MANAGERS', '').split(",")]
-
-SECRET_KEY = os.environ['SECRET_KEY']
+ADMINS = getaddresses([env('DJANGO_ADMINS', default='root@localhost')])
+MANAGERS = getaddresses([env('DJANGO_MANAGERS', default='root_localhost')])
 
 TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-US'
-
-DATABASES = {'default': dj_database_url.config(default=DATABASE_URL)}
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -61,18 +62,22 @@ INSTALLED_APPS = (
     'adminsortable2',
     'storages',
 )
-
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-)
+]
+
+if DEBUG:
+    # Inject the debug toolbar
+    security_index = MIDDLEWARE.index('django.middleware.security.SecurityMiddleware')
+    MIDDLEWARE.insert(security_index+1, 'debug_toolbar.middleware.DebugToolbarMiddleware')
+    INSTALLED_APPS.append('debug_toolbar.apps.DebugToolbarConfig')
 
 ROOT_URLCONF = 'core.urls'
 
@@ -97,3 +102,5 @@ WSGI_APPLICATION = 'core.wsgi.application'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
+
+DEFAULT_AUTO_FIELD='django.db.models.BigAutoField'
