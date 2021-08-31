@@ -51,7 +51,7 @@ MANAGERS = getaddresses([env('DJANGO_MANAGERS', default='root_localhost')])
 TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-US'
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -61,7 +61,8 @@ INSTALLED_APPS = (
     'invoices',
     'adminsortable2',
     'storages',
-)
+]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
