@@ -23,7 +23,7 @@ class PaidListFilter(admin.SimpleListFilter):
 class ClientAdmin(admin.ModelAdmin):
     pass
 
-class InlineBase(SortableInlineAdminMixin, admin.TabularInline):
+class InlineBase(SortableInlineAdminMixin, admin.StackedInline):
     extra = 0
 
 class HourlyServiceInline(InlineBase):
