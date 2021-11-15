@@ -24,6 +24,7 @@ COPY . /code
 
 # Temporary secret key for collecting static
 ARG SECRET_KEY=-
+ARG DEBUG=FALSE
 
 RUN python manage.py collectstatic --no-input
 EXPOSE 8000
