@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib import admin
 
 from adminsortable2.admin import SortableInlineAdminMixin
@@ -66,7 +68,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     fields = ['client', 'vendor', 'date', 'description', 'total', 'public']
     readonly_fields = ['total']
     
-    actions = ['update_totals']
+    actions = ['update_totals', 'assume_payment']
     
     inlines = [HourlyServiceInline, FixedServiceInline, ExpenseInline, PaymentInline, CreditInline, RelatedPDFInline]
     list_filter = ['vendor__name', 'client__name', PaidListFilter]
@@ -79,6 +81,16 @@ class InvoiceAdmin(admin.ModelAdmin):
     
     update_totals.short_description = "Update the totals for selected invoices"
     
+    def assume_payment(self, request, queryset):
+        for invoice in queryset.filter(total__gt=0):
+            print(invoice, invoice.total)
+
+            Credit.objects.create(invoice=invoice, date=date.today(), description='Credit to clear balance', amount=invoice.total)
+            invoice.update_totals()
+            invoice.save()
+
+    assume_payment.short_description = "Clear total via credit"
+
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
         invoice = form.instance
