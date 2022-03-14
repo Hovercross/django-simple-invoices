@@ -126,7 +126,7 @@ class ReverseDisplayTotalMixin(object):
         return "-"
     
 class LineItem(models.Model):
-    invoice = models.ForeignKey(Invoice, on_delete=models.DO_NOTHING)
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     date = models.DateField(blank=True, null=True)
     description = models.CharField(max_length=255, blank=True)
     
