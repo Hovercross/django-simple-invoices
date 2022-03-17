@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 from email.utils import getaddresses
 from pathlib import Path
+from secrets import choice
+from string import ascii_letters
 
 import environ
 
@@ -22,8 +24,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if (dotenv := (BASE_DIR / ".env")).exists():
     environ.Env.read_env(dotenv)
 
+DOCKER_BUILD = env.bool('DOCKER_BUILD', default=False)
+
+if DOCKER_BUILD:
+    # If we are in a Docker build, I want to set a random secret key.
+    # I consider this to be better than setting a secret key in the Dockerfile,
+    # since if it were to somehow get run in production we'd have a misbehaving
+    # system and not one with an exposed secret key
+    secret_default = ''.join(choice(ascii_letters) for _ in range(64))
+else:
+    secret_default = None
+
+
 DEBUG = env.bool('DEBUG', default=False)
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env('SECRET_KEY', default=secret_default)
 
 DATABASES = {'default': env.db(default='sqlite:///' + (BASE_DIR / 'db.sqlite3').absolute().as_posix()), }
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
