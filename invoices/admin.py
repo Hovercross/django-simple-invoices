@@ -71,7 +71,7 @@ class InvoiceAdmin(admin.ModelAdmin):
     actions = ['update_totals', 'assume_payment']
     
     inlines = [HourlyServiceInline, FixedServiceInline, ExpenseInline, PaymentInline, CreditInline, RelatedPDFInline]
-    list_filter = ['vendor__name', 'client__name', PaidListFilter]
+    list_filter = ['vendor__name', 'client__name', 'date', PaidListFilter]
     list_display = ('__str__', 'vendor', 'client', 'date', 'description', 'total')
     
     def update_totals(self, request, queryset):
