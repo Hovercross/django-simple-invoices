@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'invoices',
     'adminsortable2',
     'storages',
+    "calendar_filter",
 ]
 
 MIDDLEWARE = [
