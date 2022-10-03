@@ -81,6 +81,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'lb_health_check.middleware.AliveCheck',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -122,3 +123,5 @@ USE_L10N = True
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD='django.db.models.BigAutoField'
+
+ALIVENESS_URL = "/health-check/"
