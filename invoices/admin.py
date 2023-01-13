@@ -158,6 +158,8 @@ class InvoiceAdmin(admin.ModelAdmin):
             for client, total in sorted(by_client_totals.items(), key=lambda t: t[1]):
                 out.write(f"\t{client.name}: {total}\n")
 
+            out.write("\n")
+
         resp = HttpResponse(content=out.getvalue())
         resp["content-type"] = "text/plain"
 
