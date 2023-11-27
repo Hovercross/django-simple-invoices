@@ -11,7 +11,7 @@ RUN python -m venv --copies /app/.venv
 RUN . /app/.venv/bin/activate && poetry install
 
 FROM python:3.12-slim-bookworm as prod
-RUN apt-get update && apt-get install -y postgresql-client
+RUN apt-get update && apt-get install -y postgresql-client libjpeg-dev
 
 COPY --from=builder /app/.venv /app/.venv/
 ENV PATH /app/.venv/bin:$PATH
