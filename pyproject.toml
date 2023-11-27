@@ -6,7 +6,7 @@ authors = ["Adam Peacock <adam@thepeacock.net>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.12"
 Django = "^3.2.15"
 django-storages = "^1.11.1"
 reportlab = "^3.6.1"

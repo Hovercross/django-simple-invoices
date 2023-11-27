@@ -1,4 +1,4 @@
-FROM python:3.10-buster as builder
+FROM python:3.12-bookworm as builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY poetry.lock pyproject.toml /app/
 RUN python -m venv --copies /app/.venv
 RUN . /app/.venv/bin/activate && poetry install
 
-FROM python:3.10-slim-buster as prod
+FROM python:3.12-slim-bookworm as prod
 RUN apt-get update && apt-get install -y postgresql-client
 
 COPY --from=builder /app/.venv /app/.venv/
