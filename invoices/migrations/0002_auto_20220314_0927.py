@@ -5,80 +5,107 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('invoices', '0001_initial'),
+        ("invoices", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='client',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="client",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='credit',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="credit",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='credit',
-            name='invoice',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='invoices.invoice'),
+            model_name="credit",
+            name="invoice",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="invoices.invoice"
+            ),
         ),
         migrations.AlterField(
-            model_name='expense',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="expense",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='expense',
-            name='invoice',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='invoices.invoice'),
+            model_name="expense",
+            name="invoice",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="invoices.invoice"
+            ),
         ),
         migrations.AlterField(
-            model_name='fixedservice',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="fixedservice",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='fixedservice',
-            name='invoice',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='invoices.invoice'),
+            model_name="fixedservice",
+            name="invoice",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="invoices.invoice"
+            ),
         ),
         migrations.AlterField(
-            model_name='hourlyservice',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="hourlyservice",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='hourlyservice',
-            name='invoice',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='invoices.invoice'),
+            model_name="hourlyservice",
+            name="invoice",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="invoices.invoice"
+            ),
         ),
         migrations.AlterField(
-            model_name='invoice',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="invoice",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="payment",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='invoice',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='invoices.invoice'),
+            model_name="payment",
+            name="invoice",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="invoices.invoice"
+            ),
         ),
         migrations.AlterField(
-            model_name='relatedpdf',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="relatedpdf",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
         migrations.AlterField(
-            model_name='vendor',
-            name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            model_name="vendor",
+            name="id",
+            field=models.BigAutoField(
+                auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
+            ),
         ),
     ]

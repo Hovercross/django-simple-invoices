@@ -24,22 +24,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 if (dotenv := (BASE_DIR / ".env")).exists():
     environ.Env.read_env(dotenv)
 
-DOCKER_BUILD = env.bool('DOCKER_BUILD', default=False)
+DOCKER_BUILD = env.bool("DOCKER_BUILD", default=False)
 
 if DOCKER_BUILD:
     # If we are in a Docker build, I want to set a random secret key.
     # I consider this to be better than setting a secret key in the Dockerfile,
     # since if it were to somehow get run in production we'd have a misbehaving
     # system and not one with an exposed secret key
-    secret_default = ''.join(choice(ascii_letters) for _ in range(64))
+    secret_default = "".join(choice(ascii_letters) for _ in range(64))
 else:
     secret_default = None
 
 
-DEBUG = env.bool('DEBUG', default=False)
-SECRET_KEY = env('SECRET_KEY', default=secret_default)
+DEBUG = env.bool("DEBUG", default=False)
+SECRET_KEY = env("SECRET_KEY", default=secret_default)
 
-DATABASES = {'default': env.db(default='sqlite:///' + (BASE_DIR / 'db.sqlite3').absolute().as_posix()), }
+DATABASES = {
+    "default": env.db(
+        default="sqlite:///" + (BASE_DIR / "db.sqlite3").absolute().as_posix()
+    ),
+}
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
 
 # These are for DigitalOcean Spaces
@@ -49,80 +53,86 @@ AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID", default=None)
 AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY", default=None)
 AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default=None)
 
-DEFAULT_FILE_STORAGE = env("DEFAULT_FILE_STORAGE", default="django.core.files.storage.FileSystemStorage")
+DEFAULT_FILE_STORAGE = env(
+    "DEFAULT_FILE_STORAGE", default="django.core.files.storage.FileSystemStorage"
+)
 
 MEDIA_ROOT = BASE_DIR / "scratch" / "media"
 MEDIA_URL = env.str("MEDIA_URL", "/media/")
 
 STATIC_ROOT = BASE_DIR / "scratch" / "static"
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend"
+)
 SERVER_EMAIL = env("SERVER_EMAIL", default="root@localhost")
 
-ADMINS = getaddresses([env('DJANGO_ADMINS', default='root@localhost')])
-MANAGERS = getaddresses([env('DJANGO_MANAGERS', default='root_localhost')])
+ADMINS = getaddresses([env("DJANGO_ADMINS", default="root@localhost")])
+MANAGERS = getaddresses([env("DJANGO_MANAGERS", default="root_localhost")])
 
-TIME_ZONE = 'America/New_York'
-LANGUAGE_CODE = 'en-US'
+TIME_ZONE = "America/New_York"
+LANGUAGE_CODE = "en-US"
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'invoices',
-    'adminsortable2',
-    'storages',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "invoices",
+    "adminsortable2",
+    "storages",
     "calendar_filter",
 ]
 
 MIDDLEWARE = [
-    'lb_health_check.middleware.AliveCheck',
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "lb_health_check.middleware.AliveCheck",
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 if DEBUG:
     # Inject the debug toolbar
-    security_index = MIDDLEWARE.index('django.middleware.security.SecurityMiddleware')
-    MIDDLEWARE.insert(security_index+1, 'debug_toolbar.middleware.DebugToolbarMiddleware')
-    INSTALLED_APPS.append('debug_toolbar.apps.DebugToolbarConfig')
+    security_index = MIDDLEWARE.index("django.middleware.security.SecurityMiddleware")
+    MIDDLEWARE.insert(
+        security_index + 1, "debug_toolbar.middleware.DebugToolbarMiddleware"
+    )
+    INSTALLED_APPS.append("debug_toolbar.apps.DebugToolbarConfig")
 
-ROOT_URLCONF = 'core.urls'
+ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'core.wsgi.application'
+WSGI_APPLICATION = "core.wsgi.application"
 
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-DEFAULT_AUTO_FIELD='django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ALIVENESS_URL = "/health-check/"

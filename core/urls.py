@@ -20,7 +20,7 @@ import invoices.urls
 import calendar_filter.urls
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('invoices/', include(invoices.urls)),
-    path('calendars/', include(calendar_filter.urls)),
+    path("admin/", admin.site.urls),
+    path("invoices/", include(invoices.urls)),
+    path("calendars/", include(calendar_filter.urls)),
 ]

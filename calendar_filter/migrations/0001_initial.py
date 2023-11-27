@@ -6,41 +6,73 @@ import uuid
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='CalendarView',
+            name="CalendarView",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=256, unique=True)),
-                ('key', models.UUIDField(default=uuid.uuid4)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=256, unique=True)),
+                ("key", models.UUIDField(default=uuid.uuid4)),
             ],
         ),
         migrations.CreateModel(
-            name='RemoteCalendar',
+            name="RemoteCalendar",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=256, unique=True)),
-                ('url', models.URLField(verbose_name='URL')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=256, unique=True)),
+                ("url", models.URLField(verbose_name="URL")),
             ],
         ),
         migrations.CreateModel(
-            name='SubjectExclusion',
+            name="SubjectExclusion",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('subject', models.CharField(max_length=4096)),
-                ('case_sensitive', models.BooleanField(default=False)),
-                ('view', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='subject_exclusions', to='calendar_filter.calendarview')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("subject", models.CharField(max_length=4096)),
+                ("case_sensitive", models.BooleanField(default=False)),
+                (
+                    "view",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="subject_exclusions",
+                        to="calendar_filter.calendarview",
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='calendarview',
-            name='calendar',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='calendar_filter.remotecalendar'),
+            model_name="calendarview",
+            name="calendar",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="calendar_filter.remotecalendar",
+            ),
         ),
     ]

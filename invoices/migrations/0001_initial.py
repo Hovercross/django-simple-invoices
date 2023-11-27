@@ -9,174 +9,304 @@ import uuid
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Client',
+            name="Client",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('address', models.TextField(blank=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                ("address", models.TextField(blank=True)),
             ],
             options={
-                'ordering': ['name'],
+                "ordering": ["name"],
             },
         ),
         migrations.CreateModel(
-            name='Credit',
+            name="Credit",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date', models.DateField(blank=True, null=True)),
-                ('description', models.CharField(blank=True, max_length=255)),
-                ('position', models.PositiveIntegerField(db_index=True, default=0)),
-                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("date", models.DateField(blank=True, null=True)),
+                ("description", models.CharField(blank=True, max_length=255)),
+                ("position", models.PositiveIntegerField(db_index=True, default=0)),
+                ("total", models.DecimalField(decimal_places=2, max_digits=20)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
             ],
             options={
-                'ordering': ['position'],
-                'abstract': False,
-            },
-            bases=(models.Model, invoices.models.ReverseDisplayTotalMixin),
-        ),
-        migrations.CreateModel(
-            name='Expense',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date', models.DateField(blank=True, null=True)),
-                ('description', models.CharField(blank=True, max_length=255)),
-                ('position', models.PositiveIntegerField(db_index=True, default=0)),
-                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-            ],
-            options={
-                'ordering': ['position'],
-                'abstract': False,
-            },
-            bases=(models.Model, invoices.models.DisplayTotalMixin),
-        ),
-        migrations.CreateModel(
-            name='FixedService',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date', models.DateField(blank=True, null=True)),
-                ('description', models.CharField(blank=True, max_length=255)),
-                ('position', models.PositiveIntegerField(db_index=True, default=0)),
-                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-            ],
-            options={
-                'ordering': ['position'],
-                'abstract': False,
-            },
-            bases=(models.Model, invoices.models.DisplayTotalMixin),
-        ),
-        migrations.CreateModel(
-            name='HourlyService',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date', models.DateField(blank=True, null=True)),
-                ('description', models.CharField(blank=True, max_length=255)),
-                ('position', models.PositiveIntegerField(db_index=True, default=0)),
-                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('location', models.CharField(blank=True, max_length=255, null=True)),
-                ('rate', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('duration', models.DurationField(null=True)),
-            ],
-            options={
-                'ordering': ['position'],
-                'abstract': False,
-            },
-            bases=(models.Model, invoices.models.DisplayTotalMixin),
-        ),
-        migrations.CreateModel(
-            name='Invoice',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('description', models.CharField(blank=True, max_length=254)),
-                ('uuid', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('public', models.BooleanField(default=False)),
-                ('date', models.DateField(blank=True, null=True)),
-                ('finalized', models.BooleanField(default=False)),
-                ('hourly_services_total', models.DecimalField(decimal_places=2, default=0, max_digits=20)),
-                ('fixed_services_total', models.DecimalField(decimal_places=2, default=0, max_digits=20)),
-                ('expense_total', models.DecimalField(decimal_places=2, default=0, max_digits=20)),
-                ('payment_total', models.DecimalField(decimal_places=2, default=0, max_digits=20)),
-                ('credit_total', models.DecimalField(decimal_places=2, default=0, max_digits=20)),
-                ('total_charges', models.DecimalField(decimal_places=2, default=0, max_digits=20)),
-                ('total_credits', models.DecimalField(decimal_places=2, default=0, max_digits=20)),
-                ('total', models.DecimalField(decimal_places=2, default=0, max_digits=20)),
-                ('client', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='invoices.Client')),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Payment',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date', models.DateField(blank=True, null=True)),
-                ('description', models.CharField(blank=True, max_length=255)),
-                ('position', models.PositiveIntegerField(db_index=True, default=0)),
-                ('total', models.DecimalField(decimal_places=2, max_digits=20)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('invoice', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='invoices.Invoice')),
-            ],
-            options={
-                'ordering': ['position'],
-                'abstract': False,
+                "ordering": ["position"],
+                "abstract": False,
             },
             bases=(models.Model, invoices.models.ReverseDisplayTotalMixin),
         ),
         migrations.CreateModel(
-            name='RelatedPDF',
+            name="Expense",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('description', models.CharField(blank=True, max_length=254)),
-                ('position', models.PositiveIntegerField(db_index=True, default=0)),
-                ('pdf', models.FileField(upload_to=invoices.models.uuidUpload, verbose_name='PDF')),
-                ('invoice', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='invoices.Invoice')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("date", models.DateField(blank=True, null=True)),
+                ("description", models.CharField(blank=True, max_length=255)),
+                ("position", models.PositiveIntegerField(db_index=True, default=0)),
+                ("total", models.DecimalField(decimal_places=2, max_digits=20)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
             ],
             options={
-                'ordering': ['position'],
+                "ordering": ["position"],
+                "abstract": False,
+            },
+            bases=(models.Model, invoices.models.DisplayTotalMixin),
+        ),
+        migrations.CreateModel(
+            name="FixedService",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("date", models.DateField(blank=True, null=True)),
+                ("description", models.CharField(blank=True, max_length=255)),
+                ("position", models.PositiveIntegerField(db_index=True, default=0)),
+                ("total", models.DecimalField(decimal_places=2, max_digits=20)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+            ],
+            options={
+                "ordering": ["position"],
+                "abstract": False,
+            },
+            bases=(models.Model, invoices.models.DisplayTotalMixin),
+        ),
+        migrations.CreateModel(
+            name="HourlyService",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("date", models.DateField(blank=True, null=True)),
+                ("description", models.CharField(blank=True, max_length=255)),
+                ("position", models.PositiveIntegerField(db_index=True, default=0)),
+                ("total", models.DecimalField(decimal_places=2, max_digits=20)),
+                ("location", models.CharField(blank=True, max_length=255, null=True)),
+                ("rate", models.DecimalField(decimal_places=2, max_digits=10)),
+                ("duration", models.DurationField(null=True)),
+            ],
+            options={
+                "ordering": ["position"],
+                "abstract": False,
+            },
+            bases=(models.Model, invoices.models.DisplayTotalMixin),
+        ),
+        migrations.CreateModel(
+            name="Invoice",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("description", models.CharField(blank=True, max_length=254)),
+                (
+                    "uuid",
+                    models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
+                ),
+                ("public", models.BooleanField(default=False)),
+                ("date", models.DateField(blank=True, null=True)),
+                ("finalized", models.BooleanField(default=False)),
+                (
+                    "hourly_services_total",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=20),
+                ),
+                (
+                    "fixed_services_total",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=20),
+                ),
+                (
+                    "expense_total",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=20),
+                ),
+                (
+                    "payment_total",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=20),
+                ),
+                (
+                    "credit_total",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=20),
+                ),
+                (
+                    "total_charges",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=20),
+                ),
+                (
+                    "total_credits",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=20),
+                ),
+                (
+                    "total",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=20),
+                ),
+                (
+                    "client",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="invoices.Client",
+                    ),
+                ),
+            ],
+        ),
+        migrations.CreateModel(
+            name="Payment",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("date", models.DateField(blank=True, null=True)),
+                ("description", models.CharField(blank=True, max_length=255)),
+                ("position", models.PositiveIntegerField(db_index=True, default=0)),
+                ("total", models.DecimalField(decimal_places=2, max_digits=20)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "invoice",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.DO_NOTHING,
+                        to="invoices.Invoice",
+                    ),
+                ),
+            ],
+            options={
+                "ordering": ["position"],
+                "abstract": False,
+            },
+            bases=(models.Model, invoices.models.ReverseDisplayTotalMixin),
+        ),
+        migrations.CreateModel(
+            name="RelatedPDF",
+            fields=[
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("description", models.CharField(blank=True, max_length=254)),
+                ("position", models.PositiveIntegerField(db_index=True, default=0)),
+                (
+                    "pdf",
+                    models.FileField(
+                        upload_to=invoices.models.uuidUpload, verbose_name="PDF"
+                    ),
+                ),
+                (
+                    "invoice",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="invoices.Invoice",
+                    ),
+                ),
+            ],
+            options={
+                "ordering": ["position"],
             },
         ),
         migrations.CreateModel(
-            name='Vendor',
+            name="Vendor",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('phone', models.CharField(blank=True, max_length=50)),
-                ('email', models.EmailField(blank=True, max_length=254)),
-                ('checks_payable_to', models.CharField(blank=True, max_length=254)),
-                ('address', models.TextField(blank=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                ("phone", models.CharField(blank=True, max_length=50)),
+                ("email", models.EmailField(blank=True, max_length=254)),
+                ("checks_payable_to", models.CharField(blank=True, max_length=254)),
+                ("address", models.TextField(blank=True)),
             ],
         ),
         migrations.AddField(
-            model_name='invoice',
-            name='vendor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='invoices.Vendor'),
+            model_name="invoice",
+            name="vendor",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.DO_NOTHING, to="invoices.Vendor"
+            ),
         ),
         migrations.AddField(
-            model_name='hourlyservice',
-            name='invoice',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='invoices.Invoice'),
+            model_name="hourlyservice",
+            name="invoice",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.DO_NOTHING, to="invoices.Invoice"
+            ),
         ),
         migrations.AddField(
-            model_name='fixedservice',
-            name='invoice',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='invoices.Invoice'),
+            model_name="fixedservice",
+            name="invoice",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.DO_NOTHING, to="invoices.Invoice"
+            ),
         ),
         migrations.AddField(
-            model_name='expense',
-            name='invoice',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='invoices.Invoice'),
+            model_name="expense",
+            name="invoice",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.DO_NOTHING, to="invoices.Invoice"
+            ),
         ),
         migrations.AddField(
-            model_name='credit',
-            name='invoice',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='invoices.Invoice'),
+            model_name="credit",
+            name="invoice",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.DO_NOTHING, to="invoices.Invoice"
+            ),
         ),
     ]
