@@ -45,6 +45,14 @@ DATABASES = {
     ),
 }
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
+HOSTED_ENVIRONMENT = env.bool("HOSTED_ENVIRONMENT", False)
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CSRF_TRUSTED_ORIGINS", default=["http://localhost:8000", "http://127.0.0.1:8000"]
+)
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=False)
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=False)
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=False)
+SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=None)
 
 # These are for DigitalOcean Spaces
 AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default=None)
@@ -56,6 +64,10 @@ AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default=None)
 DEFAULT_FILE_STORAGE = env(
     "DEFAULT_FILE_STORAGE", default="django.core.files.storage.FileSystemStorage"
 )
+
+if HOSTED_ENVIRONMENT:
+    USE_X_FORWARDED_HOST = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 MEDIA_ROOT = BASE_DIR / "scratch" / "media"
 MEDIA_URL = env.str("MEDIA_URL", "/media/")
