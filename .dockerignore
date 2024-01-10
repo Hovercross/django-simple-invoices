@@ -25,3 +25,5 @@ venv
 
 .vscode
 .idea
+.env
+.pdm-python
