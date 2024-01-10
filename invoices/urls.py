@@ -1,20 +1,20 @@
-from django.conf.urls import url
+from django.urls import path
 
 import invoices.views
 
 urlpatterns = [
-    url(
-        r"^invoice/public/(?P<uuid>[0-9a-z\-]+)/$",
+    path(
+        "invoice/public/<uuid:uuid>/$",
         invoices.views.invoice_public,
         name="invoice-pdf",
     ),
-    url(
-        r"^invoice/private/(?P<id>[0-9]+)/$",
+    path(
+        "invoice/private/<int:id>/$",
         invoices.views.invoice_private,
         name="invoice-pdf",
     ),
-    url(
-        r"^client/private/hours/(?P<client_id>[0-9]+)/$",
+    path(
+        "client/private/hours/<int:client_id>/$",
         invoices.views.client_weekly_hours,
         name="client-hours",
     ),
