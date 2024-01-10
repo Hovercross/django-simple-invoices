@@ -1,6 +1,16 @@
 [tool.pdm]
 package-type = "application"
 
+[tool.pdm.dev-dependencies]
+dev = [
+    "types-requests<3.0.0,>=2.28.11",
+    "ruff<1.0.0,>=0.1.6",
+    "django-debug-toolbar>=4.2.0",
+]
+
+[tool.pdm.build]
+includes = []
+
 [project]
 name = "peacockhosting-apps"
 version = "0.1.0"
@@ -25,8 +35,3 @@ requires-python = ">=3.12,<4.0"
 license = { text = "MIT" }
 
 
-[tool.pdm.dev-dependencies]
-dev = ["types-requests<3.0.0,>=2.28.11", "ruff<1.0.0,>=0.1.6"]
-
-[tool.pdm.build]
-includes = []

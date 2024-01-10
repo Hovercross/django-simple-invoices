@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.contrib import admin
 from django.http import HttpResponse
 
-from adminsortable2.admin import SortableInlineAdminMixin
+from adminsortable2.admin import SortableInlineAdminMixin, SortableAdminBase
 
 from invoices.models import (
     Client,
@@ -84,7 +84,7 @@ class RelatedPDFInline(InlineBase):
     model = RelatedPDF
 
 
-class InvoiceAdmin(admin.ModelAdmin):
+class InvoiceAdmin(SortableAdminBase, admin.ModelAdmin):
     def invoice(self, o):
         return "Invoice {}".format(o.id)
 
