@@ -18,6 +18,8 @@ dependencies = [
     "django-lb-health-check<2.0.0,>=1.0.1",
     "requests<3.0.0,>=2.28.1",
     "icalendar<5.0.0,>=4.1.0",
+    "gunicorn>=21.2.0",
+    "psycopg>=3.1.17",
 ]
 requires-python = ">=3.12,<4.0"
 license = { text = "MIT" }
